@@ -16,6 +16,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Blade directive: @nonce
+        \Illuminate\Support\Facades\Blade::directive('nonce', function () {
+            return '<?php echo app()->bound("csp_nonce") ? "nonce=\"".app("csp_nonce")."\"" : ""; ?>';
+        });
         // Force HTTPS in production
         if (config('app.env') === 'production') {
             \Illuminate\Support\Facades\URL::forceScheme('https');

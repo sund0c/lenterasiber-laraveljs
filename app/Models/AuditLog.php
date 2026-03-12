@@ -40,7 +40,7 @@ class AuditLog extends Model
         ?array $newValues = null
     ): void {
         static::create([
-            'admin_user_id' => auth('admin')->id(),
+            'admin_user_id' => session('auth_user_id'),
             'action'        => $action,
             'entity_type'   => $entityType,
             'entity_id'     => $entityId,

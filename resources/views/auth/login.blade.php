@@ -39,11 +39,11 @@
         autocomplete="current-password"
         required
       >
-      <button type="button" class="toggle-pw" onclick="togglePw()" aria-label="Toggle password visibility">
-        <svg id="eye-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-        </svg>
-      </button>
+<button type="button" class="toggle-pw" id="togglePw" aria-label="Toggle password">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+  </svg>
+</button>
     </div>
   </div>
 
@@ -55,10 +55,5 @@
   </button>
 </form>
 
-<script>
-function togglePw() {
-  var pw = document.getElementById('password');
-  pw.type = pw.type === 'password' ? 'text' : 'password';
-}
-</script>
+
 @endsection

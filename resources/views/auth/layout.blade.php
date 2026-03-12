@@ -23,5 +23,6 @@
     @yield('content')
   </div>
 </div>
+<script src="{{ asset('js/admin.js') }}" nonce="{{ $cspNonce }}"></script>
 </body>
 </html>

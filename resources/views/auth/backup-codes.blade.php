@@ -15,9 +15,12 @@
         @endforeach
     </div>
 
-    <button type="button" onclick="copyAll()" class="btn-secondary" style="width:100%;margin-bottom:1rem">
-        Salin Semua Kode
-    </button>
+ {{-- Hapus onclick dari button --}}
+<button type="button" class="btn-secondary" id="btnCopy" style="width:100%;margin-bottom:1rem">
+  Salin Semua Kode
+</button>
+
+
 
     <form method="POST" action="{{ route('auth.2fa.backup.post') }}">
         @csrf
@@ -26,12 +29,4 @@
         </button>
     </form>
 
-    <script>
-        function copyAll() {
-            var codes = Array.from(document.querySelectorAll('.backup-code')).map(function(el) {
-                return el.textContent.trim();
-            });
-            navigator.clipboard && navigator.clipboard.writeText(codes.join('\n'));
-        }
-    </script>
 @endsection
