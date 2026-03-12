@@ -35,9 +35,12 @@ class CreateAdminUser extends Command
             'username' => ['required', 'alpha_dash', 'min:3', 'max:40', 'unique:admin_users'],
             'email'    => ['required', 'email', 'max:255', 'unique:admin_users'],
             'password' => [
-                'required', 'min:12',
-                'regex:/[A-Z]/', 'regex:/[a-z]/',
-                'regex:/[0-9]/', 'regex:/[\W]/',
+                'required',
+                'min:12',
+                'regex:/[A-Z]/',
+                'regex:/[a-z]/',
+                'regex:/[0-9]/',
+                'regex:/[\W]/',
             ],
         ], [
             'password.regex' => 'Password harus mengandung huruf besar, kecil, angka, dan simbol.',
@@ -59,7 +62,8 @@ class CreateAdminUser extends Command
             'username'  => $username,
             'full_name' => $fullName,
             'email'     => $email,
-            'password'  => $password, // hashed by model mutator
+            'password' => Hash::make($password, ['rounds' => 13]), // ganti dari: $password
+            'role'     => 'admin', // tambahkan ini
         ]);
 
         $this->info("✓ Admin user '{$username}' berhasil dibuat (ID: {$user->id}).");

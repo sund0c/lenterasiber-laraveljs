@@ -64,6 +64,14 @@ if (addStat) {
     });
   }
 
+  // ── Toggle password (multi field, data-toggle-pw) ────────
+  document.querySelectorAll('[data-toggle-pw]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var input = document.getElementById(btn.getAttribute('data-toggle-pw'));
+      if (input) input.type = input.type === 'password' ? 'text' : 'password';
+    });
+  });
+  
   // ── OTP cells (totp-setup) ───────────────────────────────
   var cells  = document.querySelectorAll('.otp-cell');
   var hidden = document.getElementById('totp_hidden');

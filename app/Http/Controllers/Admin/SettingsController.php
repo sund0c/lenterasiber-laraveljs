@@ -1,16 +1,39 @@
 <?php
-// app/Http/Controllers/Admin/SettingsController.php
+
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\AdminUser;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class SettingsController extends Controller
 {
+    // Definisi semua key yang valid beserta type-nya
+    private array $schema = [
+        // Umum
+        'site_name'         => 'string',
+        'site_description'  => 'string',
+        'contact_email'     => 'string',
+        'contact_phone'     => 'string',
+        'contact_address'   => 'string',
+        // Medsos
+        'social_instagram'  => 'string',
+        'social_twitter'    => 'string',
+        'social_youtube'    => 'string',
+        'social_facebook'   => 'string',
+        'social_linkedin'   => 'string',
+        // Halaman Statis
+        'page_tos'          => 'text',
+        'page_privacy'      => 'text',
+        'page_tos_date'     => 'string',
+        'page_privacy_date' => 'string',
+        // Statistik
+        'stat_workshop'     => 'int',
+        'stat_asn'          => 'int',
+        'stat_article'      => 'int',
+    ];
+
     public function index()
     {
         $settings = DB::table('site_settings')->get()->keyBy('key');
@@ -19,45 +42,42 @@ class SettingsController extends Controller
 
     public function update(Request $request)
     {
-        $data = $request->validate([
-            'workshop_count' => ['nullable','integer','min:0'],
-            'asn_count'      => ['nullable','integer','min:0'],
-            'article_count'  => ['nullable','integer','min:0'],
+        $request->validate([
+            'site_name'        => ['nullable', 'string', 'max:150'],
+            'site_description' => ['nullable', 'string', 'max:300'],
+            'contact_email'    => ['nullable', 'email', 'max:255'],
+            'contact_phone'    => ['nullable', 'string', 'max:30'],
+            'contact_address'  => ['nullable', 'string', 'max:300'],
+            'social_instagram' => ['nullable', 'url', 'max:500'],
+            'social_twitter'   => ['nullable', 'url', 'max:500'],
+            'social_youtube'   => ['nullable', 'url', 'max:500'],
+            'social_facebook'  => ['nullable', 'url', 'max:500'],
+            'social_linkedin'  => ['nullable', 'url', 'max:500'],
+            'page_tos'         => ['nullable', 'string'],
+            'page_privacy'     => ['nullable', 'string'],
+            'stat_workshop'    => ['nullable', 'integer', 'min:0'],
+            'stat_asn'         => ['nullable', 'integer', 'min:0'],
+            'stat_article'     => ['nullable', 'integer', 'min:0'],
+            'page_tos_date'     => ['nullable', 'string', 'max:50'],
+            'page_privacy_date' => ['nullable', 'string', 'max:50'],
         ]);
 
-        foreach ($data as $key => $value) {
-            DB::table('site_settings')->updateOrInsert(
-                ['key' => $key],
-                ['value' => $value, 'updated_at' => now(), 'created_at' => now()]
-            );
+        // Hanya simpan key yang ada di schema (whitelist)
+        foreach ($this->schema as $key => $type) {
+            if ($request->has($key)) {
+                DB::table('site_settings')->updateOrInsert(
+                    ['key' => $key],
+                    [
+                        'value'      => $request->input($key),
+                        'type'       => $type,
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+            }
         }
 
         AuditLog::record('settings.update');
-        return back()->with('success', 'Pengaturan disimpan.');
-    }
-
-    public function changePassword(Request $request)
-    {
-        $request->validate([
-            'current_password' => ['required'],
-            'new_password'     => [
-                'required', 'min:12', 'confirmed',
-                'regex:/[A-Z]/', 'regex:/[a-z]/', 'regex:/[0-9]/', 'regex:/[\W]/',
-            ],
-        ], [
-            'new_password.regex' => 'Password harus mengandung huruf besar, kecil, angka, dan simbol.',
-        ]);
-
-        $user = AdminUser::findOrFail(session('auth_user_id'));
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return back()->withErrors(['current_password' => 'Password saat ini tidak cocok.']);
-        }
-
-        $user->password = $request->new_password;
-        $user->save();
-
-        AuditLog::record('settings.password_changed', 'AdminUser', $user->id);
-        return back()->with('success', 'Password berhasil diubah.');
+        return back()->with('success', 'Pengaturan berhasil disimpan.');
     }
 }

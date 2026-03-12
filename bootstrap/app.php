@@ -17,12 +17,17 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         // Apply security headers globally
         $middleware->append(SecurityHeadersMiddleware::class);
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\ForcePasswordChangeMiddleware::class,
+        ]);
 
         // Named middleware aliases
         $middleware->alias([
             'auth.step1' => AuthStep1Middleware::class,
             'auth.full'  => AuthFullMiddleware::class,
             'auth.audit' => AuditMiddleware::class,
+            'role'                  => \App\Http\Middleware\RoleMiddleware::class,
+            'force.password.change' => \App\Http\Middleware\ForcePasswordChangeMiddleware::class,
         ]);
 
         // Trusted proxies (adjust for your Nginx/load balancer)

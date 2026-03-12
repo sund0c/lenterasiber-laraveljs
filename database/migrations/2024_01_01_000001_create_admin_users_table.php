@@ -14,6 +14,9 @@ return new class extends Migration
             $table->string('full_name', 150);
             $table->string('email', 255)->unique();
             $table->string('password');
+            $table->timestamp('password_changed_at')->nullable();
+            $table->text('password_history')->nullable();   // JSON: 2 hash terakhir
+            $table->enum('role', ['admin', 'staf'])->default('staf');
             $table->string('totp_secret', 64)->nullable();
             $table->boolean('totp_enabled')->default(false);
             $table->text('backup_codes')->nullable();
@@ -24,7 +27,6 @@ return new class extends Migration
             $table->boolean('force_password_change')->default(false);
             $table->rememberToken();
             $table->timestamps();
-            $table->softDeletes();
 
             $table->index(['username', 'email']);
         });
