@@ -55,10 +55,10 @@ return new class extends Migration
             $table->string('title', 255);
             $table->string('excerpt', 400)->nullable();
             $table->longText('content');
-            $table->string('category', 80)->default('edukasi');
+            $table->string('category', 80)->nullable();         // nullable: diisi admin
             $table->enum('status', ['draft', 'published'])->default('draft');
             $table->timestamp('published_at')->nullable();
-            $table->unsignedSmallInteger('read_minutes')->default(3);
+            $table->date('published_date')->nullable();
             $table->string('thumbnail', 255)->nullable();
             $table->unsignedInteger('view_count')->default(0);
             $table->string('meta_title', 70)->nullable();
@@ -69,30 +69,31 @@ return new class extends Migration
             $table->softDeletes();
 
             $table->index(['status', 'published_at']);
+            $table->index(['status', 'published_date']);
         });
 
-        // ── Layanan (semua field digabung) ────────────────────
+        // ── Layanan ───────────────────────────────────────────
         Schema::create('layanan', function (Blueprint $table) {
             $table->id();
             $table->string('program_number', 10)->default('01');
-            $table->string('section_label', 80)->nullable();    // "KOMPETISI TAHUNAN"
+            $table->string('section_label', 80)->nullable();
             $table->string('icon', 80)->nullable();
             $table->string('title', 150);
-            $table->string('title_plain', 150)->nullable();     // bagian judul normal
-            $table->string('title_highlight', 150)->nullable(); // bagian judul biru
+            $table->string('title_plain', 150)->nullable();
+            $table->string('title_highlight', 150)->nullable();
             $table->string('short_desc', 300)->nullable();
             $table->longText('full_content')->nullable();
-            $table->json('features')->nullable();               // ["Hands-on practice", ...]
-            $table->string('badge_label', 60)->nullable();      // "WORKSHOP // ACTIVE"
+            $table->json('features')->nullable();
+            $table->string('badge_label', 60)->nullable();
             $table->string('cover_image', 255)->nullable();
-            $table->string('target_label', 60)->nullable();     // "TARGET 2025"
-            $table->string('target_value', 150)->nullable();    // "42 OPD Pemprov Bali"
-            $table->string('box_label', 80)->nullable();        // "JADWAL TERDEKAT"
-            $table->string('box_value', 200)->nullable();       // "Latsar Gel. III — 2 Mei 2025"
-            $table->json('stats')->nullable();                  // [{"value":"30 APR","label":"BATAS DAFTAR"}]
-            $table->string('cta_text', 80)->nullable();         // "DAFTAR SEKARANG"
+            $table->string('target_label', 60)->nullable();
+            $table->string('target_value', 150)->nullable();
+            $table->string('box_label', 80)->nullable();
+            $table->string('box_value', 200)->nullable();
+            $table->json('stats')->nullable();
+            $table->string('cta_text', 80)->nullable();
             $table->string('cta_url', 500)->nullable();
-            $table->string('card_style', 20)->default('default'); // workshop|roadshow|latsar|sentinel|default
+            $table->string('card_style', 20)->default('default');
             $table->boolean('is_active')->default(true);
             $table->unsignedSmallInteger('sort_order')->default(0);
             $table->foreignId('created_by')->nullable()->constrained('admin_users')->nullOnDelete();
@@ -116,21 +117,23 @@ return new class extends Migration
             $table->index(['status', 'event_date']);
         });
 
-        // ── Komik (semua field digabung) ──────────────────────
+        // ── Komik ─────────────────────────────────────────────
         Schema::create('komik', function (Blueprint $table) {
             $table->id();
             $table->string('title', 255);
-            $table->string('episode_number', 20)->nullable();   // "Episode 1"
-            $table->string('category', 100)->nullable();        // "Keamanan Email"
-            $table->string('instagram_url', 500)->nullable();   // link Instagram
+            $table->string('episode_number', 20)->nullable();
+            $table->string('category', 100)->nullable();        // nullable: diisi admin
+            $table->string('instagram_url', 500)->nullable();
             $table->text('description')->nullable();
             $table->string('cover_image', 255)->nullable();
             $table->string('file_path', 255)->nullable();
             $table->boolean('is_published')->default(false);
-            $table->unsignedSmallInteger('sort_order')->default(0);
+            $table->date('published_date')->nullable();         // sort by date, no sort_order
             $table->foreignId('created_by')->nullable()->constrained('admin_users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
+
+            $table->index(['is_published', 'published_date']);
         });
 
         // ── Podcast ───────────────────────────────────────────
@@ -139,6 +142,7 @@ return new class extends Migration
             $table->string('title', 255);
             $table->text('description')->nullable();
             $table->string('episode_number', 20)->nullable();
+            $table->string('category', 100)->nullable();        // nullable: diisi admin
             $table->string('audio_url', 500)->nullable();
             $table->string('thumbnail', 255)->nullable();
             $table->unsignedSmallInteger('duration_minutes')->nullable();

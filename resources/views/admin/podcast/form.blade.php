@@ -24,7 +24,6 @@
       </div>
     @endif
 
-    {{-- ── INFO EPISODE ──────────────────────────────────── --}}
     <div class="card" style="margin-bottom:1rem">
       <div class="card-header"><strong>Informasi Episode</strong></div>
       <div class="card-body">
@@ -36,9 +35,7 @@
               class="form-input @error('episode_number') is-error @enderror"
               value="{{ old('episode_number', $item->episode_number ?? '') }}"
               placeholder="EP.08" maxlength="20" required>
-            @error('episode_number')
-              <p class="field-error">{{ $message }}</p>
-            @enderror
+            @error('episode_number')<p class="field-error">{{ $message }}</p>@enderror
           </div>
           <div class="form-group">
             <label>Durasi (menit) <span style="color:var(--red)">*</span></label>
@@ -46,9 +43,7 @@
               class="form-input @error('duration_minutes') is-error @enderror"
               value="{{ old('duration_minutes', $item->duration_minutes ?? '') }}"
               placeholder="45" min="1" required>
-            @error('duration_minutes')
-              <p class="field-error">{{ $message }}</p>
-            @enderror
+            @error('duration_minutes')<p class="field-error">{{ $message }}</p>@enderror
           </div>
         </div>
 
@@ -59,9 +54,7 @@
             value="{{ old('title', $item->title ?? '') }}"
             placeholder="Ransomware: Ancaman Nyata bagi Data Pemerintah"
             maxlength="255" required>
-          @error('title')
-            <p class="field-error">{{ $message }}</p>
-          @enderror
+          @error('title')<p class="field-error">{{ $message }}</p>@enderror
         </div>
 
         <div class="form-group">
@@ -71,9 +64,7 @@
             placeholder="Membahas modus operandi ransomware modern..."
             maxlength="100" required>{{ old('description', $item->description ?? '') }}</textarea>
           <p class="field-hint">Tampil di kartu podcast halaman publik. Maksimal 100 karakter.</p>
-          @error('description')
-            <p class="field-error">{{ $message }}</p>
-          @enderror
+          @error('description')<p class="field-error">{{ $message }}</p>@enderror
         </div>
 
         <div class="form-group">
@@ -84,15 +75,12 @@
             placeholder="https://open.spotify.com/episode/..."
             maxlength="500" required>
           <p class="field-hint">Link Spotify, Anchor, YouTube, atau platform podcast lainnya.</p>
-          @error('audio_url')
-            <p class="field-error">{{ $message }}</p>
-          @enderror
+          @error('audio_url')<p class="field-error">{{ $message }}</p>@enderror
         </div>
 
       </div>
     </div>
 
-    {{-- ── COVER & PENGATURAN ────────────────────────────── --}}
     <div class="card" style="margin-bottom:1rem">
       <div class="card-header"><strong>Cover & Pengaturan</strong></div>
       <div class="card-body">
@@ -108,12 +96,10 @@
           @endif
           <input type="file" name="thumbnail"
             class="form-input @error('thumbnail') is-error @enderror"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png"
             {{ !isset($item) ? 'required' : '' }}>
-          <p class="field-hint">JPG, PNG, WebP. Maks 2MB. Rasio 1:1 disarankan.</p>
-          @error('thumbnail')
-            <p class="field-error">{{ $message }}</p>
-          @enderror
+          <p class="field-hint">JPG, PNG. Maks 2MB. Rasio 1:1 disarankan.</p>
+          @error('thumbnail')<p class="field-error">{{ $message }}</p>@enderror
         </div>
 
         <div class="form-row">
@@ -123,9 +109,7 @@
               class="form-input @error('published_date') is-error @enderror"
               value="{{ old('published_date', $item->published_date ?? '') }}"
               required>
-            @error('published_date')
-              <p class="field-error">{{ $message }}</p>
-            @enderror
+            @error('published_date')<p class="field-error">{{ $message }}</p>@enderror
           </div>
 
           <div class="form-group" style="display:flex;align-items:center;padding-top:1.6rem">

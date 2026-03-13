@@ -36,9 +36,7 @@
             value="{{ old('title', $item->title ?? '') }}"
             placeholder="Mengenali Serangan Phishing di Kotak Masuk Email Resmi"
             maxlength="255" required>
-          @error('title')
-            <p class="field-error">{{ $message }}</p>
-          @enderror
+          @error('title')<p class="field-error">{{ $message }}</p>@enderror
         </div>
 
         <div class="form-row">
@@ -50,26 +48,44 @@
             <p class="field-hint">Kosongkan untuk generate otomatis.</p>
           </div>
           <div class="form-group">
-            <label>Kategori <span style="color:var(--red)">*</span></label>
-            <input type="text" name="category"
-              class="form-input @error('category') is-error @enderror"
-              value="{{ old('category', $item->category ?? '') }}"
-              placeholder="TIPS KEAMANAN"
-              maxlength="80" required
-              list="category-suggestions">
-            <datalist id="category-suggestions">
-              <option value="TIPS KEAMANAN">
-              <option value="KEBIJAKAN">
-              <option value="WASPADA">
-              <option value="EDUKASI">
-              <option value="PROGRAM">
-              <option value="BERITA">
-            </datalist>
-            @error('category')
-              <p class="field-error">{{ $message }}</p>
-            @enderror
+            <label>Tanggal Publish <span style="color:var(--red)">*</span></label>
+            <input type="date" name="published_date"
+              class="form-input @error('published_date') is-error @enderror"
+              value="{{ old('published_date', isset($item->published_date) ? \Carbon\Carbon::parse($item->published_date)->format('Y-m-d') : date('Y-m-d')) }}"
+              required>
+            @error('published_date')<p class="field-error">{{ $message }}</p>@enderror
           </div>
         </div>
+
+        {{-- Kategori: hanya admin --}}
+        @if($isAdmin)
+        <div class="form-group">
+          <label>Kategori <span style="color:var(--red)">*</span></label>
+          <input type="text" name="category"
+            class="form-input @error('category') is-error @enderror"
+            value="{{ old('category', $item->category ?? '') }}"
+            placeholder="TIPS KEAMANAN" maxlength="80" required
+            list="category-suggestions">
+          <datalist id="category-suggestions">
+            <option value="TIPS KEAMANAN">
+            <option value="KEBIJAKAN">
+            <option value="WASPADA">
+            <option value="EDUKASI">
+            <option value="PROGRAM">
+            <option value="BERITA">
+          </datalist>
+          @error('category')<p class="field-error">{{ $message }}</p>@enderror
+        </div>
+        @else
+          @if(isset($item) && $item->category)
+          <div class="form-group">
+            <label>Kategori</label>
+            <p style="font-size:0.85rem;color:var(--muted);padding:0.5rem 0">
+              {{ $item->category }} <span style="font-size:0.75rem">(diatur oleh Admin)</span>
+            </p>
+          </div>
+          @endif
+        @endif
 
         <div class="form-group">
           <label>Ringkasan / Excerpt <span style="color:var(--red)">*</span></label>
@@ -78,9 +94,7 @@
             placeholder="Panduan lengkap mengidentifikasi email phishing..."
             maxlength="100" required>{{ old('excerpt', $item->excerpt ?? '') }}</textarea>
           <p class="field-hint">Maksimal 100 karakter. Tampil di kartu artikel halaman publik.</p>
-          @error('excerpt')
-            <p class="field-error">{{ $message }}</p>
-          @enderror
+          @error('excerpt')<p class="field-error">{{ $message }}</p>@enderror
         </div>
 
         <div class="form-group">
@@ -89,9 +103,7 @@
             class="form-input @error('content') is-error @enderror"
             placeholder="Tulis isi artikel di sini..." required>{{ old('content', $item->content ?? '') }}</textarea>
           <p class="field-hint">Mendukung HTML: &lt;p&gt; &lt;h2&gt; &lt;h3&gt; &lt;ul&gt; &lt;ol&gt; &lt;li&gt; &lt;strong&gt; &lt;em&gt; &lt;a href=""&gt; &lt;blockquote&gt;</p>
-          @error('content')
-            <p class="field-error">{{ $message }}</p>
-          @enderror
+          @error('content')<p class="field-error">{{ $message }}</p>@enderror
         </div>
 
       </div>
@@ -113,45 +125,29 @@
           @endif
           <input type="file" name="thumbnail"
             class="form-input @error('thumbnail') is-error @enderror"
-            accept="image/jpeg,image/png,image/webp"
+            accept="image/jpeg,image/png"
             {{ !isset($item) ? 'required' : '' }}>
-          <p class="field-hint">JPG, PNG, WebP. Maks 2MB. Rasio 16:9 disarankan.</p>
-          @error('thumbnail')
-            <p class="field-error">{{ $message }}</p>
-          @enderror
+          <p class="field-hint">JPG, PNG. Maks 2MB. Rasio 16:9 disarankan.</p>
+          @error('thumbnail')<p class="field-error">{{ $message }}</p>@enderror
         </div>
 
-        <div class="form-row">
-          <div class="form-group">
-            <label>Estimasi Baca (menit) <span style="color:var(--red)">*</span></label>
-            <input type="number" name="read_minutes"
-              class="form-input @error('read_minutes') is-error @enderror"
-              value="{{ old('read_minutes', $item->read_minutes ?? 3) }}"
-              min="1" max="60" required>
-            @error('read_minutes')
-              <p class="field-error">{{ $message }}</p>
-            @enderror
-          </div>
-
-          <div class="form-group" style="display:flex;align-items:center;padding-top:1.6rem">
-  @if($isAdmin)
-    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.88rem">
-      <input type="hidden" name="status" value="draft">
-      <input type="checkbox" name="status" value="published"
-        {{ old('status', $item->status ?? '') === 'published' ? 'checked' : '' }}
-        style="width:16px;height:16px;cursor:pointer">
-      Publikasikan
-    </label>
-  @else
-    <span style="font-size:0.82rem;color:var(--muted)">Status:&nbsp;</span>
-    @if(isset($item) && $item->status === 'published')
-      <span class="badge badge-green">Publik</span>
-    @else
-      <span class="badge badge-gray">Draft</span>
-    @endif
-  @endif
-</div>
-
+        <div class="form-group" style="display:flex;align-items:center;padding-top:0.4rem">
+          @if($isAdmin)
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:0.88rem">
+              <input type="hidden" name="status" value="draft">
+              <input type="checkbox" name="status" value="published"
+                {{ old('status', $item->status ?? '') === 'published' ? 'checked' : '' }}
+                style="width:16px;height:16px;cursor:pointer">
+              Publikasikan
+            </label>
+          @else
+            <span style="font-size:0.82rem;color:var(--muted)">Status:&nbsp;</span>
+            @if(isset($item) && $item->status === 'published')
+              <span class="badge badge-green">Publik</span>
+            @else
+              <span class="badge badge-gray">Draft</span>
+            @endif
+          @endif
         </div>
 
       </div>
@@ -172,13 +168,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var titleInput = document.getElementById('kabar_title');
   var slugInput  = document.getElementById('kabar_slug');
   if (!titleInput || !slugInput) return;
-
   var slugEdited = slugInput.value !== '';
-
-  slugInput.addEventListener('input', function () {
-    slugEdited = true;
-  });
-
+  slugInput.addEventListener('input', function () { slugEdited = true; });
   titleInput.addEventListener('input', function () {
     if (slugEdited) return;
     slugInput.value = titleInput.value

@@ -10,12 +10,9 @@ use Illuminate\Support\Str;
 
 class PodcastController extends Controller
 {
-    // ── Helpers ───────────────────────────────────────────────
     private function currentUser(): object
     {
-        $user = DB::table('admin_users')
-            ->where('id', session('auth_user_id'))
-            ->first();
+        $user = DB::table('admin_users')->where('id', session('auth_user_id'))->first();
         abort_if(!$user, 403);
         return $user;
     }
@@ -32,23 +29,39 @@ class PodcastController extends Controller
         }
     }
 
-    // ── Index ─────────────────────────────────────────────────
-    public function index()
+    public function index(Request $request)
     {
-        $items = DB::table('podcast')
-            ->whereNull('deleted_at')
-            ->orderByDesc('episode_number')
-            ->get();
-        return view('admin.podcast.index', compact('items'));
+        $sortable = ['title', 'episode_number', 'category', 'duration_minutes', 'published_date', 'is_published'];
+        $sort     = in_array($request->get('sort'), $sortable) ? $request->get('sort') : 'published_date';
+        $dir      = $request->get('dir') === 'asc' ? 'asc' : 'desc';
+        $search   = trim($request->get('q', ''));
+
+        $query = DB::table('podcast')->whereNull('deleted_at');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('episode_number', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $query->orderBy($sort, $dir);
+        if ($sort !== 'id') {
+            $query->orderBy('id', 'desc');
+        }
+
+        $items = $query->paginate(10)->withQueryString();
+
+        return view('admin.podcast.index', compact('items', 'sort', 'dir', 'search'));
     }
 
-    // ── Create ────────────────────────────────────────────────
     public function create()
     {
         return view('admin.podcast.form', ['item' => null]);
     }
 
-    // ── Store ─────────────────────────────────────────────────
     public function store(Request $request)
     {
         $data = $this->validated($request);
@@ -69,7 +82,6 @@ class PodcastController extends Controller
         return redirect()->route('admin.podcast.index')->with('success', 'Podcast berhasil disimpan.');
     }
 
-    // ── Show (view-only untuk staf pada podcast published) ────
     public function show(int $id)
     {
         $item = DB::table('podcast')->whereNull('deleted_at')->where('id', $id)->first();
@@ -83,7 +95,6 @@ class PodcastController extends Controller
         return view('admin.podcast.show', compact('item'));
     }
 
-    // ── Edit ──────────────────────────────────────────────────
     public function edit(int $id)
     {
         $item = DB::table('podcast')->whereNull('deleted_at')->where('id', $id)->first();
@@ -92,7 +103,6 @@ class PodcastController extends Controller
         return view('admin.podcast.form', compact('item'));
     }
 
-    // ── Update ────────────────────────────────────────────────
     public function update(Request $request, int $id)
     {
         $item = DB::table('podcast')->whereNull('deleted_at')->where('id', $id)->first();
@@ -117,7 +127,6 @@ class PodcastController extends Controller
         return redirect()->route('admin.podcast.index')->with('success', 'Podcast berhasil diperbarui.');
     }
 
-    // ── Destroy ───────────────────────────────────────────────
     public function destroy(int $id)
     {
         $item = DB::table('podcast')->whereNull('deleted_at')->where('id', $id)->first();
@@ -129,7 +138,6 @@ class PodcastController extends Controller
         return redirect()->route('admin.podcast.index')->with('success', 'Podcast dihapus.');
     }
 
-    // ── Validated ─────────────────────────────────────────────
     private function validated(Request $request): array
     {
         $data = $request->validate([
@@ -151,7 +159,6 @@ class PodcastController extends Controller
         return $data;
     }
 
-    // ── Handle Upload ─────────────────────────────────────────
     private function handleUpload(Request $request): ?string
     {
         if (!$request->hasFile('thumbnail')) return null;
@@ -160,10 +167,10 @@ class PodcastController extends Controller
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime  = $finfo->file($file->getRealPath());
 
-        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
 
         if (!array_key_exists($mime, $allowed)) {
-            abort(422, 'Tipe file tidak valid. Hanya JPG, PNG, WebP.');
+            abort(422, 'Tipe file tidak valid. Hanya JPG dan PNG.');
         }
         if ($file->getSize() > 2048 * 1024) {
             abort(422, 'Ukuran file melebihi 2MB.');
@@ -171,7 +178,6 @@ class PodcastController extends Controller
 
         $name = Str::random(40) . '.' . $allowed[$mime];
         $file->storeAs('uploads/podcast', $name, 'public');
-
         return 'uploads/podcast/' . $name;
     }
 }

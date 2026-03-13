@@ -12,7 +12,6 @@ class KabarController extends Controller
 {
     use ChecksRole;
 
-    // ── Guard: staf tidak bisa aksi pada artikel published ──
     private function guardPublished(object $item): void
     {
         if ($this->isStaf() && $item->status === 'published') {
@@ -20,28 +19,42 @@ class KabarController extends Controller
         }
     }
 
-    // ── Index ─────────────────────────────────────────────
-    public function index()
+    public function index(Request $request)
     {
-        $items = DB::table('kabar')
-            ->whereNull('deleted_at')
-            ->orderByDesc('id')
-            ->get();
-        return view('admin.kabar.index', compact('items'));
+        $sortable = ['title', 'category', 'published_date', 'status'];
+        $sort     = in_array($request->get('sort'), $sortable) ? $request->get('sort') : 'published_date';
+        $dir      = $request->get('dir') === 'asc' ? 'asc' : 'desc';
+        $search   = trim($request->get('q', ''));
+
+        $query = DB::table('kabar')->whereNull('deleted_at');
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('excerpt', 'like', "%{$search}%");
+            });
+        }
+
+        $query->orderBy($sort, $dir);
+        if ($sort !== 'id') {
+            $query->orderBy('id', 'desc');
+        }
+
+        $items = $query->paginate(10)->withQueryString();
+
+        return view('admin.kabar.index', compact('items', 'sort', 'dir', 'search'));
     }
 
-    // ── Create ────────────────────────────────────────────
     public function create()
     {
         return view('admin.kabar.form', ['item' => null]);
     }
 
-    // ── Store ─────────────────────────────────────────────
     public function store(Request $request)
     {
         $data = $this->validated($request);
 
-        // Staf selalu draft
         if ($this->isStaf()) {
             $data['status'] = 'draft';
         }
@@ -63,13 +76,11 @@ class KabarController extends Controller
         return redirect()->route('admin.kabar.index')->with('success', 'Artikel berhasil disimpan.');
     }
 
-    // ── Show (view-only untuk staf pada artikel published) ─
     public function show(int $id)
     {
         $item = DB::table('kabar')->whereNull('deleted_at')->where('id', $id)->first();
         abort_if(!$item, 404);
 
-        // Admin langsung ke edit
         if ($this->isAdmin()) {
             return redirect()->route('admin.kabar.edit', $id);
         }
@@ -78,7 +89,6 @@ class KabarController extends Controller
         return view('admin.kabar.show', compact('item'));
     }
 
-    // ── Edit ──────────────────────────────────────────────
     public function edit(int $id)
     {
         $item = DB::table('kabar')->whereNull('deleted_at')->where('id', $id)->first();
@@ -87,7 +97,6 @@ class KabarController extends Controller
         return view('admin.kabar.form', compact('item'));
     }
 
-    // ── Update ────────────────────────────────────────────
     public function update(Request $request, int $id)
     {
         $item = DB::table('kabar')->whereNull('deleted_at')->where('id', $id)->first();
@@ -96,9 +105,9 @@ class KabarController extends Controller
 
         $data = $this->validated($request);
 
-        // Staf tidak bisa publish
         if ($this->isStaf()) {
-            $data['status'] = 'draft';
+            $data['status']   = 'draft';
+            $data['category'] = $item->category;
         }
 
         if ($request->hasFile('thumbnail')) {
@@ -114,7 +123,6 @@ class KabarController extends Controller
         return redirect()->route('admin.kabar.index')->with('success', 'Artikel berhasil diperbarui.');
     }
 
-    // ── Destroy ───────────────────────────────────────────
     public function destroy(int $id)
     {
         $item = DB::table('kabar')->whereNull('deleted_at')->where('id', $id)->first();
@@ -126,7 +134,6 @@ class KabarController extends Controller
         return redirect()->route('admin.kabar.index')->with('success', 'Artikel dihapus.');
     }
 
-    // ── Publish / Unpublish (admin only) ──────────────────
     public function publish(int $id)
     {
         $this->requireAdmin();
@@ -158,22 +165,31 @@ class KabarController extends Controller
         return redirect()->route('admin.kabar.index')->with('success', 'Artikel dikembalikan ke draft.');
     }
 
-    // ── Validated ─────────────────────────────────────────
     private function validated(Request $request): array
     {
-        $data = $request->validate([
-            'title'        => ['required', 'string', 'max:255'],
-            'category'     => ['required', 'string', 'max:80'],
-            'excerpt'      => ['required', 'string', 'max:100'],
-            'content'      => ['required', 'string'],
-            'read_minutes' => ['required', 'integer', 'min:1', 'max:60'],
-            'status'       => ['nullable', 'in:draft,published'],
-        ]);
+        $isAdmin = $this->isAdmin();
 
-        // Sanitize
-        $data['title']    = strip_tags($data['title']);
-        $data['category'] = strip_tags($data['category']);
-        $data['excerpt']  = strip_tags($data['excerpt']);
+        $rules = [
+            'title'          => ['required', 'string', 'max:255'],
+            'excerpt'        => ['required', 'string', 'max:100'],
+            'content'        => ['required', 'string'],
+            'published_date' => ['required', 'date'],
+            'status'         => ['nullable', 'in:draft,published'],
+        ];
+
+        if ($isAdmin) {
+            $rules['category'] = ['required', 'string', 'max:80'];
+        } else {
+            $rules['category'] = ['nullable', 'string', 'max:80'];
+        }
+
+        $data = $request->validate($rules);
+
+        $data['title']   = strip_tags($data['title']);
+        $data['excerpt'] = strip_tags($data['excerpt']);
+        if (isset($data['category'])) {
+            $data['category'] = strip_tags($data['category']);
+        }
 
         return $data;
     }
@@ -195,10 +211,10 @@ class KabarController extends Controller
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime  = $finfo->file($file->getRealPath());
 
-        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png'];
 
         if (!array_key_exists($mime, $allowed)) {
-            abort(422, 'Tipe file tidak valid. Hanya JPG, PNG, WebP.');
+            abort(422, 'Tipe file tidak valid. Hanya JPG dan PNG.');
         }
         if ($file->getSize() > 2048 * 1024) {
             abort(422, 'Ukuran file melebihi 2MB.');
