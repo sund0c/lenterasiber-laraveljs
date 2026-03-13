@@ -10,6 +10,10 @@
 @endsection
 
 @section('content')
+@php
+  $isAdmin = DB::table('admin_users')->where('id', session('auth_user_id'))->value('role') === 'admin';
+@endphp
+
 <div class="card">
   @if($items->isEmpty())
     <div class="card-body" style="text-align:center;padding:3rem;color:var(--muted)">
@@ -26,11 +30,12 @@
           <th>Durasi</th>
           <th>Link Audio</th>
           <th>Status</th>
-          <th style="width:120px">Aksi</th>
+          <th style="width:140px">Aksi</th>
         </tr>
       </thead>
       <tbody>
         @foreach($items as $item)
+        @php $locked = !$isAdmin && $item->is_published; @endphp
         <tr>
           <td>
             @if($item->thumbnail)
@@ -73,11 +78,16 @@
           </td>
           <td>
             <div style="display:flex;gap:6px">
-              <a href="{{ route('admin.podcast.edit', $item->id) }}"
-                class="btn-secondary" style="padding:4px 10px;font-size:0.75rem">Edit</a>
-              <button type="button" class="btn-danger btn-delete"
-                data-action="{{ route('admin.podcast.destroy', $item->id) }}"
-                style="padding:4px 10px;font-size:0.75rem">Hapus</button>
+              @if($locked)
+                <a href="{{ route('admin.podcast.show', $item->id) }}"
+                  class="btn-secondary" style="padding:4px 10px;font-size:0.75rem">Lihat</a>
+              @else
+                <a href="{{ route('admin.podcast.edit', $item->id) }}"
+                  class="btn-secondary" style="padding:4px 10px;font-size:0.75rem">Edit</a>
+                <button type="button" class="btn-danger btn-delete"
+                  data-action="{{ route('admin.podcast.destroy', $item->id) }}"
+                  style="padding:4px 10px;font-size:0.75rem">Hapus</button>
+              @endif
             </div>
           </td>
         </tr>

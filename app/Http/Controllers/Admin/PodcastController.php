@@ -10,6 +10,29 @@ use Illuminate\Support\Str;
 
 class PodcastController extends Controller
 {
+    // ── Helpers ───────────────────────────────────────────────
+    private function currentUser(): object
+    {
+        $user = DB::table('admin_users')
+            ->where('id', session('auth_user_id'))
+            ->first();
+        abort_if(!$user, 403);
+        return $user;
+    }
+
+    private function isAdmin(): bool
+    {
+        return $this->currentUser()->role === 'admin';
+    }
+
+    private function guardPublished(object $item): void
+    {
+        if (!$this->isAdmin() && $item->is_published) {
+            abort(403, 'Podcast yang sudah dipublikasikan hanya bisa diubah oleh Admin.');
+        }
+    }
+
+    // ── Index ─────────────────────────────────────────────────
     public function index()
     {
         $items = DB::table('podcast')
@@ -19,14 +42,21 @@ class PodcastController extends Controller
         return view('admin.podcast.index', compact('items'));
     }
 
+    // ── Create ────────────────────────────────────────────────
     public function create()
     {
         return view('admin.podcast.form', ['item' => null]);
     }
 
+    // ── Store ─────────────────────────────────────────────────
     public function store(Request $request)
     {
         $data = $this->validated($request);
+
+        if (!$this->isAdmin()) {
+            $data['is_published'] = false;
+        }
+
         $data['created_by'] = session('auth_user_id');
         $data['thumbnail']  = $this->handleUpload($request);
 
@@ -39,19 +69,42 @@ class PodcastController extends Controller
         return redirect()->route('admin.podcast.index')->with('success', 'Podcast berhasil disimpan.');
     }
 
+    // ── Show (view-only untuk staf pada podcast published) ────
+    public function show(int $id)
+    {
+        $item = DB::table('podcast')->whereNull('deleted_at')->where('id', $id)->first();
+        abort_if(!$item, 404);
+
+        if ($this->isAdmin()) {
+            return redirect()->route('admin.podcast.edit', $id);
+        }
+
+        abort_if(!$item->is_published, 403);
+        return view('admin.podcast.show', compact('item'));
+    }
+
+    // ── Edit ──────────────────────────────────────────────────
     public function edit(int $id)
     {
         $item = DB::table('podcast')->whereNull('deleted_at')->where('id', $id)->first();
         abort_if(!$item, 404);
+        $this->guardPublished($item);
         return view('admin.podcast.form', compact('item'));
     }
 
+    // ── Update ────────────────────────────────────────────────
     public function update(Request $request, int $id)
     {
         $item = DB::table('podcast')->whereNull('deleted_at')->where('id', $id)->first();
         abort_if(!$item, 404);
+        $this->guardPublished($item);
 
         $data = $this->validated($request);
+
+        if (!$this->isAdmin()) {
+            unset($data['is_published']);
+        }
+
         if ($request->hasFile('thumbnail')) {
             $data['thumbnail'] = $this->handleUpload($request);
         }
@@ -64,29 +117,41 @@ class PodcastController extends Controller
         return redirect()->route('admin.podcast.index')->with('success', 'Podcast berhasil diperbarui.');
     }
 
+    // ── Destroy ───────────────────────────────────────────────
     public function destroy(int $id)
     {
+        $item = DB::table('podcast')->whereNull('deleted_at')->where('id', $id)->first();
+        abort_if(!$item, 404);
+        $this->guardPublished($item);
+
         DB::table('podcast')->where('id', $id)->update(['deleted_at' => now()]);
         AuditLog::record('podcast.delete', 'podcast', $id);
         return redirect()->route('admin.podcast.index')->with('success', 'Podcast dihapus.');
     }
 
+    // ── Validated ─────────────────────────────────────────────
     private function validated(Request $request): array
     {
         $data = $request->validate([
             'title'            => ['required', 'string', 'max:255'],
-            'episode_number'   => ['nullable', 'string', 'max:20'],
-            'description'      => ['nullable', 'string'],
-            'audio_url'        => ['nullable', 'url', 'max:500'],
-            'duration_minutes' => ['nullable', 'integer', 'min:1'],
+            'episode_number'   => ['required', 'string', 'max:20'],
+            'description'      => ['required', 'string', 'max:100'],
+            'audio_url'        => ['required', 'url', 'max:500'],
+            'duration_minutes' => ['required', 'integer', 'min:1'],
+            'published_date'   => ['required', 'date'],
             'is_published'     => ['nullable', 'boolean'],
-            'published_date'   => ['nullable', 'date'],
         ]);
 
         $data['is_published'] = $request->boolean('is_published');
+
+        foreach (['title', 'episode_number', 'description'] as $field) {
+            $data[$field] = strip_tags($data[$field]);
+        }
+
         return $data;
     }
 
+    // ── Handle Upload ─────────────────────────────────────────
     private function handleUpload(Request $request): ?string
     {
         if (!$request->hasFile('thumbnail')) return null;
@@ -95,15 +160,16 @@ class PodcastController extends Controller
         $finfo = new \finfo(FILEINFO_MIME_TYPE);
         $mime  = $finfo->file($file->getRealPath());
 
-        if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp'])) {
-            abort(422, 'Tipe file tidak valid.');
+        $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
+
+        if (!array_key_exists($mime, $allowed)) {
+            abort(422, 'Tipe file tidak valid. Hanya JPG, PNG, WebP.');
         }
         if ($file->getSize() > 2048 * 1024) {
-            abort(422, 'File terlalu besar. Maks 2MB.');
+            abort(422, 'Ukuran file melebihi 2MB.');
         }
 
-        $ext  = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'][$mime];
-        $name = Str::random(32) . '.' . $ext;
+        $name = Str::random(40) . '.' . $allowed[$mime];
         $file->storeAs('uploads/podcast', $name, 'public');
 
         return 'uploads/podcast/' . $name;

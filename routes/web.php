@@ -55,7 +55,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth.full', 'auth.audit'])-
     Route::post('password/change', [PasswordController::class, 'update'])->name('password.update');
 
     // Kabar
+    Route::get('kabar/{id}/show', [KabarController::class, 'show'])->name('kabar.show');
     Route::resource('kabar', KabarController::class)->except(['show']);
+
     Route::middleware(\App\Http\Middleware\RoleMiddleware::class . ':admin')->group(function () {
         Route::post('kabar/{id}/publish',   [KabarController::class, 'publish'])->name('kabar.publish');
         Route::post('kabar/{id}/unpublish', [KabarController::class, 'unpublish'])->name('kabar.unpublish');
@@ -68,10 +70,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth.full', 'auth.audit'])-
     Route::resource('workshop', WorkshopController::class)->except(['show']);
 
     // Komik
-    Route::resource('komik',    KomikController::class)->except(['show']);
+    Route::get('komik/{id}/show', [KomikController::class, 'show'])->name('komik.show');
+    Route::resource('komik', KomikController::class)->except(['show']);
 
     // Podcast
-    Route::resource('podcast',  PodcastController::class)->except(['show']);
+    Route::get('podcast/{id}/show', [PodcastController::class, 'show'])->name('podcast.show');
+    Route::resource('podcast', PodcastController::class)->except(['show']);
 
     // Settings
     Route::get('settings',  [SettingsController::class, 'index'])->name('settings.index');
