@@ -48,56 +48,29 @@ return new class extends Migration
             $table->integer('expiration');
         });
 
-        // ── Kabar Lentera ─────────────────────────────────────
-        Schema::create('kabar', function (Blueprint $table) {
+        // ── Konten (Kabar + Komik + Podcast) ──────────────────
+        Schema::create('konten', function (Blueprint $table) {
             $table->id();
-            $table->string('slug', 160)->unique();
+            $table->enum('label', ['KABAR', 'KOMIK', 'PODCAST']);
             $table->string('title', 255);
+            $table->string('slug', 160)->nullable()->unique();       // KABAR only
+            $table->string('episode_number', 20)->nullable();        // KOMIK & PODCAST
+            $table->string('category', 100)->nullable();             // admin only
             $table->string('excerpt', 400)->nullable();
-            $table->longText('content');
-            $table->string('category', 80)->nullable();         // nullable: diisi admin
+            $table->longText('content')->nullable();
+            $table->string('cover_image', 255)->nullable();
+            $table->string('external_url', 500)->nullable();         // instagram / audio url
+            $table->unsignedSmallInteger('duration_minutes')->nullable(); // PODCAST only
+            $table->date('published_date')->nullable();
             $table->enum('status', ['draft', 'published'])->default('draft');
             $table->timestamp('published_at')->nullable();
-            $table->date('published_date')->nullable();
-            $table->string('thumbnail', 255)->nullable();
             $table->unsignedInteger('view_count')->default(0);
-            $table->string('meta_title', 70)->nullable();
-            $table->string('meta_desc', 160)->nullable();
             $table->foreignId('created_by')->nullable()->constrained('admin_users')->nullOnDelete();
             $table->foreignId('updated_by')->nullable()->constrained('admin_users')->nullOnDelete();
             $table->timestamps();
-            $table->softDeletes();
 
-            $table->index(['status', 'published_at']);
-            $table->index(['status', 'published_date']);
-        });
-
-        // ── Layanan ───────────────────────────────────────────
-        Schema::create('layanan', function (Blueprint $table) {
-            $table->id();
-            $table->string('program_number', 10)->default('01');
-            $table->string('section_label', 80)->nullable();
-            $table->string('icon', 80)->nullable();
-            $table->string('title', 150);
-            $table->string('title_plain', 150)->nullable();
-            $table->string('title_highlight', 150)->nullable();
-            $table->string('short_desc', 300)->nullable();
-            $table->longText('full_content')->nullable();
-            $table->json('features')->nullable();
-            $table->string('badge_label', 60)->nullable();
-            $table->string('cover_image', 255)->nullable();
-            $table->string('target_label', 60)->nullable();
-            $table->string('target_value', 150)->nullable();
-            $table->string('box_label', 80)->nullable();
-            $table->string('box_value', 200)->nullable();
-            $table->json('stats')->nullable();
-            $table->string('cta_text', 80)->nullable();
-            $table->string('cta_url', 500)->nullable();
-            $table->string('card_style', 20)->default('default');
-            $table->boolean('is_active')->default(true);
-            $table->unsignedSmallInteger('sort_order')->default(0);
-            $table->foreignId('created_by')->nullable()->constrained('admin_users')->nullOnDelete();
-            $table->timestamps();
+            $table->index(['label', 'status', 'published_date']);
+            $table->index(['label', 'created_by']);
         });
 
         // ── Workshop ──────────────────────────────────────────
@@ -117,44 +90,6 @@ return new class extends Migration
             $table->index(['status', 'event_date']);
         });
 
-        // ── Komik ─────────────────────────────────────────────
-        Schema::create('komik', function (Blueprint $table) {
-            $table->id();
-            $table->string('title', 255);
-            $table->string('episode_number', 20)->nullable();
-            $table->string('category', 100)->nullable();        // nullable: diisi admin
-            $table->string('instagram_url', 500)->nullable();
-            $table->text('description')->nullable();
-            $table->string('cover_image', 255)->nullable();
-            $table->string('file_path', 255)->nullable();
-            $table->boolean('is_published')->default(false);
-            $table->date('published_date')->nullable();         // sort by date, no sort_order
-            $table->foreignId('created_by')->nullable()->constrained('admin_users')->nullOnDelete();
-            $table->timestamps();
-            $table->softDeletes();
-
-            $table->index(['is_published', 'published_date']);
-        });
-
-        // ── Podcast ───────────────────────────────────────────
-        Schema::create('podcast', function (Blueprint $table) {
-            $table->id();
-            $table->string('title', 255);
-            $table->text('description')->nullable();
-            $table->string('episode_number', 20)->nullable();
-            $table->string('category', 100)->nullable();        // nullable: diisi admin
-            $table->string('audio_url', 500)->nullable();
-            $table->string('thumbnail', 255)->nullable();
-            $table->unsignedSmallInteger('duration_minutes')->nullable();
-            $table->boolean('is_published')->default(false);
-            $table->date('published_date')->nullable();
-            $table->foreignId('created_by')->nullable()->constrained('admin_users')->nullOnDelete();
-            $table->timestamps();
-            $table->softDeletes();
-
-            $table->index(['is_published', 'published_date']);
-        });
-
         // ── Site Settings ─────────────────────────────────────
         Schema::create('site_settings', function (Blueprint $table) {
             $table->string('key', 80)->primary();
@@ -167,11 +102,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('site_settings');
-        Schema::dropIfExists('podcast');
-        Schema::dropIfExists('komik');
         Schema::dropIfExists('workshop');
-        Schema::dropIfExists('layanan');
-        Schema::dropIfExists('kabar');
+        Schema::dropIfExists('konten');
         Schema::dropIfExists('cache_locks');
         Schema::dropIfExists('cache');
         Schema::dropIfExists('sessions');

@@ -44,7 +44,7 @@ class KomikController extends Controller
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('episode_number', 'like', "%{$search}%")
                     ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('excerpt', 'like', "%{$search}%");
             });
         }
 
@@ -148,7 +148,8 @@ class KomikController extends Controller
         $rules = [
             'title'          => ['required', 'string', 'max:255'],
             'episode_number' => ['required', 'string', 'max:20'],
-            'description'    => ['nullable', 'string', 'max:2000'],
+            'excerpt'        => ['required', 'string', 'max:100'],
+            'content'        => ['nullable', 'string'],
             'instagram_url'  => ['required', 'url', 'max:500'],
             'published_date' => ['required', 'date'],
             'is_published'   => ['nullable', 'boolean'],
@@ -162,7 +163,7 @@ class KomikController extends Controller
 
         $data['is_published'] = $request->boolean('is_published');
 
-        foreach (['title', 'episode_number', 'description'] as $field) {
+        foreach (['title', 'episode_number', 'excerpt'] as $field) {
             if (isset($data[$field])) {
                 $data[$field] = strip_tags($data[$field]);
             }

@@ -9,9 +9,9 @@
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
 
   @foreach([
-    ['label'=>'Kabar Lentera', 'icon'=>'📰', 'data'=>$stats['kabar'],  'color'=>'#3b82f6'],
-    ['label'=>'Podcast',       'icon'=>'🎙', 'data'=>$stats['podcast'],'color'=>'#8b5cf6'],
-    ['label'=>'Komik',         'icon'=>'📖', 'data'=>$stats['komik'],  'color'=>'#10b981'],
+    ['label'=>'Kabar Lentera', 'icon'=>'📰', 'data'=>$stats['kabar'],  'color'=>'#3b82f6', 'key'=>'KABAR'],
+    ['label'=>'Podcast',       'icon'=>'🎙', 'data'=>$stats['podcast'],'color'=>'#8b5cf6', 'key'=>'PODCAST'],
+    ['label'=>'Komik',         'icon'=>'📖', 'data'=>$stats['komik'],  'color'=>'#10b981', 'key'=>'KOMIK'],
   ] as $item)
   <div class="card" style="border-top:3px solid {{ $item['color'] }}">
     <div class="card-body" style="padding:1.2rem">
@@ -42,17 +42,7 @@
 </div>
 
 {{-- ── Stat Cards Lainnya ──────────────────────────────── --}}
-<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
-
-  <div class="card">
-    <div class="card-body" style="padding:1.2rem;display:flex;align-items:center;gap:1rem">
-      <span style="font-size:2rem">🛠</span>
-      <div>
-        <div style="font-size:1.8rem;font-weight:700">{{ $stats['layanan'] }}</div>
-        <div style="font-size:0.78rem;color:var(--muted)">Layanan</div>
-      </div>
-    </div>
-  </div>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;margin-bottom:1.5rem">
 
   <div class="card">
     <div class="card-body" style="padding:1.2rem;display:flex;align-items:center;gap:1rem">
@@ -85,15 +75,16 @@
     <div class="card-body" style="padding:1rem">
       @php
         $drafts = collect([
-          ['label'=>'Kabar',   'count'=>$stats['kabar']['draft'],   'route'=>'admin.kabar.index'],
-          ['label'=>'Podcast', 'count'=>$stats['podcast']['draft'], 'route'=>'admin.podcast.index'],
-          ['label'=>'Komik',   'count'=>$stats['komik']['draft'],   'route'=>'admin.komik.index'],
+          ['label'=>'Kabar',   'count'=>$stats['kabar']['draft'],   'key'=>'KABAR'],
+          ['label'=>'Podcast', 'count'=>$stats['podcast']['draft'], 'key'=>'PODCAST'],
+          ['label'=>'Komik',   'count'=>$stats['komik']['draft'],   'key'=>'KOMIK'],
         ])->filter(fn($d) => $d['count'] > 0);
       @endphp
       @forelse($drafts as $d)
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:0.85rem">{{ $d['label'] }}</span>
-          <a href="{{ route($d['route']) }}" style="font-size:0.78rem;background:#fef3c720;color:#f59e0b;padding:2px 10px;border-radius:4px;border:1px solid #fbbf24;text-decoration:none">
+          <a href="{{ route('admin.konten.index', $d['key']) }}"
+            style="font-size:0.78rem;background:#fef3c720;color:#f59e0b;padding:2px 10px;border-radius:4px;border:1px solid #fbbf24;text-decoration:none">
             {{ $d['count'] }} draft →
           </a>
         </div>
@@ -107,10 +98,10 @@
   <div class="card">
     <div class="card-header"><strong>⚡ Akses Cepat</strong></div>
     <div class="card-body" style="padding:1rem;display:grid;grid-template-columns:1fr 1fr;gap:8px">
-      <a href="{{ route('admin.kabar.create') }}"   class="btn-secondary" style="text-align:center;font-size:0.78rem">+ Artikel</a>
-      <a href="{{ route('admin.podcast.create') }}"  class="btn-secondary" style="text-align:center;font-size:0.78rem">+ Podcast</a>
-      <a href="{{ route('admin.komik.create') }}"    class="btn-secondary" style="text-align:center;font-size:0.78rem">+ Komik</a>
-      <a href="{{ route('admin.users.create') }}"    class="btn-secondary" style="text-align:center;font-size:0.78rem">+ Staf</a>
+      <a href="{{ route('admin.konten.create', 'KABAR') }}"   class="btn-secondary" style="text-align:center;font-size:0.78rem">+ Artikel</a>
+      <a href="{{ route('admin.konten.create', 'PODCAST') }}" class="btn-secondary" style="text-align:center;font-size:0.78rem">+ Podcast</a>
+      <a href="{{ route('admin.konten.create', 'KOMIK') }}"   class="btn-secondary" style="text-align:center;font-size:0.78rem">+ Komik</a>
+      <a href="{{ route('admin.users.create') }}"              class="btn-secondary" style="text-align:center;font-size:0.78rem">+ Staf</a>
     </div>
   </div>
 

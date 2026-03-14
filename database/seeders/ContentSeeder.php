@@ -4,14 +4,45 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class ContentSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminId = DB::table('admin_users')->value('id');
-        $now     = now();
+        $now = now();
+
+        // ── ADMIN USERS ───────────────────────────────────────
+        $adminId = DB::table('admin_users')->insertGetId([
+            'username'              => 'superadmin',
+            'email'                 => 'admin@lenterasiber.id',
+            'full_name'             => 'Super Administrator',
+            'password'              => Hash::make('Admin@2025!', ['rounds' => 13]),
+            'role'                  => 'admin',
+            'password_changed_at'   => $now,
+            'password_history'      => json_encode([]),
+            'totp_enabled'          => false,
+            'failed_attempts'       => 0,
+            'force_password_change' => false,
+            'created_at'            => $now,
+            'updated_at'            => $now,
+        ]);
+
+        DB::table('admin_users')->insert([
+            'username'              => 'staf01',
+            'email'                 => 'staf@lenterasiber.id',
+            'full_name'             => 'Staf Konten',
+            'password'              => Hash::make('Staf@2025!', ['rounds' => 13]),
+            'role'                  => 'staf',
+            'password_changed_at'   => $now,
+            'password_history'      => json_encode([]),
+            'totp_enabled'          => false,
+            'failed_attempts'       => 0,
+            'force_password_change' => true,
+            'created_at'            => $now,
+            'updated_at'            => $now,
+        ]);
 
         // ── KOMIK ─────────────────────────────────────────────
         $komikData = [
@@ -43,16 +74,22 @@ class ContentSeeder extends Seeder
         ];
 
         foreach ($komikData as $i => [$title, $episode, $category]) {
-            DB::table('komik')->insert([
+            DB::table('konten')->insert([
+                'label'          => 'KOMIK',
+                'slug'           => 'komik-' . Str::slug($episode) . '-' . ($i + 1),
                 'title'          => $title,
                 'episode_number' => $episode,
                 'category'       => $category,
-                'instagram_url'  => 'https://www.instagram.com/p/example' . ($i + 1),
-                'description'    => 'Komik edukatif keamanan siber: ' . $title,
+                'external_url'   => 'https://www.instagram.com/p/example' . ($i + 1),
+                'excerpt'        => Str::limit('Komik edukatif keamanan siber: ' . $title, 100),
+                'content'        => '<p>Konten lengkap episode <strong>' . $title . '</strong>.</p><p>Pelajari keamanan siber melalui komik edukatif Lentera Siber.</p>',
                 'cover_image'    => null,
-                'is_published'   => ($i % 3 !== 0), // sebagian draft
+                'status'         => ($i % 3 !== 0) ? 'published' : 'draft',
                 'published_date' => now()->subDays($i * 7)->format('Y-m-d'),
+                'published_at'   => ($i % 3 !== 0) ? now()->subDays($i * 7) : null,
+                'view_count'     => rand(10, 300),
                 'created_by'     => $adminId,
+                'updated_by'     => $adminId,
                 'created_at'     => $now,
                 'updated_at'     => $now,
             ]);
@@ -60,44 +97,50 @@ class ContentSeeder extends Seeder
 
         // ── PODCAST ───────────────────────────────────────────
         $podcastData = [
-            ['Ransomware: Ancaman Nyata bagi Data Pemerintah',        'EP.01', 45],
-            ['Phishing: Kenali Sebelum Terjebak',                     'EP.02', 38],
-            ['Zero Trust Architecture di Lingkungan Pemerintah',      'EP.03', 52],
-            ['Pengelolaan Password yang Aman dan Praktis',            'EP.04', 30],
-            ['Social Engineering dan Cara Melawannya',                'EP.05', 41],
-            ['Keamanan Cloud untuk ASN Bali',                         'EP.06', 48],
-            ['Incident Response: Langkah Ketika Terjadi Serangan',    'EP.07', 55],
-            ['Privasi Data dan UU PDP',                               'EP.08', 43],
-            ['Mobile Security: Aman Bekerja dari Mana Saja',          'EP.09', 35],
-            ['Enkripsi Data: Dari Teori ke Praktik',                  'EP.10', 47],
-            ['Vulnerability Management di Instansi Pemerintah',       'EP.11', 50],
-            ['Open Source Intelligence (OSINT) untuk Pegawai',        'EP.12', 39],
-            ['Backup dan Disaster Recovery Planning',                 'EP.13', 44],
-            ['Keamanan Email Dinas',                                  'EP.14', 33],
-            ['Firewall dan IDS: Benteng Digital Kantor',              'EP.15', 46],
-            ['Ancaman Insider: Waspadai Orang Dalam',                 'EP.16', 40],
-            ['Digital Forensics: Jejak di Dunia Maya',                'EP.17', 58],
-            ['Kebijakan Keamanan Siber Nasional',                     'EP.18', 36],
-            ['SIEM: Memantau Ancaman Secara Real-Time',               'EP.19', 53],
-            ['Pentest 101: Uji Keamanan Sistem Anda',                 'EP.20', 49],
-            ['DevSecOps untuk Pengembang Pemerintah',                 'EP.21', 42],
-            ['Keamanan IoT di Lingkungan Perkantoran',                'EP.22', 37],
-            ['AI dan Ancaman Siber Masa Depan',                       'EP.23', 51],
-            ['Budaya Keamanan Siber di Tempat Kerja',                 'EP.24', 34],
-            ['Literasi Siber: Investasi SDM Digital Bali',            'EP.25', 56],
+            ['Ransomware: Ancaman Nyata bagi Data Pemerintah',        'EP.01', 45, 'Malware'],
+            ['Phishing: Kenali Sebelum Terjebak',                     'EP.02', 38, 'Keamanan Email'],
+            ['Zero Trust Architecture di Lingkungan Pemerintah',      'EP.03', 52, 'Kebijakan Keamanan'],
+            ['Pengelolaan Password yang Aman dan Praktis',            'EP.04', 30, 'Password'],
+            ['Social Engineering dan Cara Melawannya',                'EP.05', 41, 'Social Engineering'],
+            ['Keamanan Cloud untuk ASN Bali',                         'EP.06', 48, 'Cloud Computing'],
+            ['Incident Response: Langkah Ketika Terjadi Serangan',    'EP.07', 55, 'Respons Insiden'],
+            ['Privasi Data dan UU PDP',                               'EP.08', 43, 'Kebijakan'],
+            ['Mobile Security: Aman Bekerja dari Mana Saja',          'EP.09', 35, 'Mobile Security'],
+            ['Enkripsi Data: Dari Teori ke Praktik',                  'EP.10', 47, 'Kriptografi'],
+            ['Vulnerability Management di Instansi Pemerintah',       'EP.11', 50, 'Manajemen Risiko'],
+            ['Open Source Intelligence (OSINT) untuk Pegawai',        'EP.12', 39, 'Intelijen Siber'],
+            ['Backup dan Disaster Recovery Planning',                 'EP.13', 44, 'Data Protection'],
+            ['Keamanan Email Dinas',                                  'EP.14', 33, 'Keamanan Email'],
+            ['Firewall dan IDS: Benteng Digital Kantor',              'EP.15', 46, 'Keamanan Jaringan'],
+            ['Ancaman Insider: Waspadai Orang Dalam',                 'EP.16', 40, 'Keamanan Korporat'],
+            ['Digital Forensics: Jejak di Dunia Maya',                'EP.17', 58, 'Forensik Digital'],
+            ['Kebijakan Keamanan Siber Nasional',                     'EP.18', 36, 'Kebijakan'],
+            ['SIEM: Memantau Ancaman Secara Real-Time',               'EP.19', 53, 'Monitoring'],
+            ['Pentest 101: Uji Keamanan Sistem Anda',                 'EP.20', 49, 'Pengujian Keamanan'],
+            ['DevSecOps untuk Pengembang Pemerintah',                 'EP.21', 42, 'Pengembangan Aman'],
+            ['Keamanan IoT di Lingkungan Perkantoran',                'EP.22', 37, 'IoT Security'],
+            ['AI dan Ancaman Siber Masa Depan',                       'EP.23', 51, 'Tren Keamanan'],
+            ['Budaya Keamanan Siber di Tempat Kerja',                 'EP.24', 34, 'Edukasi'],
+            ['Literasi Siber: Investasi SDM Digital Bali',            'EP.25', 56, 'Edukasi'],
         ];
 
-        foreach ($podcastData as $i => [$title, $episode, $duration]) {
-            DB::table('podcast')->insert([
+        foreach ($podcastData as $i => [$title, $episode, $duration, $category]) {
+            DB::table('konten')->insert([
+                'label'            => 'PODCAST',
+                'slug'             => 'podcast-' . Str::slug($episode) . '-' . ($i + 1),
                 'title'            => $title,
                 'episode_number'   => $episode,
-                'description'      => Str::limit('Membahas ' . lcfirst($title) . ' secara mendalam.', 100),
-                'audio_url'        => 'https://open.spotify.com/episode/example' . ($i + 1),
-                'thumbnail'        => null,
+                'category'         => $category,
+                'external_url'     => 'https://open.spotify.com/episode/example' . ($i + 1),
+                'excerpt'          => Str::limit('Membahas ' . lcfirst($title) . ' secara mendalam.', 100),
+                'content'          => '<p>Catatan episode <strong>' . $title . '</strong>.</p><p>Dengarkan podcast ini untuk memahami keamanan siber bagi ASN Pemprov Bali.</p>',
                 'duration_minutes' => $duration,
-                'is_published'     => ($i % 4 !== 0),
+                'status'           => ($i % 4 !== 0) ? 'published' : 'draft',
                 'published_date'   => now()->subDays($i * 14)->format('Y-m-d'),
+                'published_at'     => ($i % 4 !== 0) ? now()->subDays($i * 14) : null,
+                'view_count'       => rand(20, 500),
                 'created_by'       => $adminId,
+                'updated_by'       => $adminId,
                 'created_at'       => $now,
                 'updated_at'       => $now,
             ]);
@@ -134,23 +177,34 @@ class ContentSeeder extends Seeder
 
         foreach ($kabarData as $i => [$title, $category]) {
             $slug = Str::slug($title) . '-' . ($i + 1);
-            DB::table('kabar')->insert([
-                'slug'           => $slug,
+            $published = ($i % 5 !== 0);
+            DB::table('konten')->insert([
+                'label'          => 'KABAR',
                 'title'          => $title,
-                'excerpt'        => Str::limit('Artikel tentang ' . lcfirst($title) . ' untuk meningkatkan kesadaran keamanan siber ASN.', 100),
-                'content'        => '<p>Ini adalah konten lengkap artikel <strong>' . $title . '</strong>.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Keamanan siber merupakan tanggung jawab bersama seluruh ASN Pemprov Bali.</p>',
+                'slug'           => $slug,
                 'category'       => $category,
-                'status'         => ($i % 5 === 0) ? 'draft' : 'published',
-                'published_at'   => ($i % 5 === 0) ? null : now()->subDays($i * 5),
+                'excerpt'        => Str::limit('Artikel tentang ' . lcfirst($title) . ' untuk meningkatkan kesadaran keamanan siber ASN.', 100),
+                'content'        => '<p>Konten lengkap artikel <strong>' . $title . '</strong>.</p><p>Keamanan siber merupakan tanggung jawab bersama seluruh ASN Pemprov Bali.</p>',
+                'status'         => $published ? 'published' : 'draft',
                 'published_date' => now()->subDays($i * 5)->format('Y-m-d'),
-                'thumbnail'      => null,
+                'published_at'   => $published ? now()->subDays($i * 5) : null,
                 'view_count'     => rand(10, 500),
                 'created_by'     => $adminId,
+                'updated_by'     => $adminId,
                 'created_at'     => $now,
                 'updated_at'     => $now,
             ]);
         }
 
-        $this->command->info('✓ Seeder selesai: 25 komik, 25 podcast, 25 kabar.');
+        $this->command->info('');
+        $this->command->info('✓ Seeder selesai: 2 user, 25 komik, 25 podcast, 25 kabar (tabel konten).');
+        $this->command->info('');
+        $this->command->info('  ┌─────────────────────────────────────────────┐');
+        $this->command->info('  │  Admin  │ superadmin  │ Admin@2025!          │');
+        $this->command->info('  │  Staf   │ staf01      │ Staf@2025!           │');
+        $this->command->info('  └─────────────────────────────────────────────┘');
+        $this->command->info('');
+        $this->command->info('  Kedua akun wajib setup 2FA saat login pertama.');
+        $this->command->info('');
     }
 }

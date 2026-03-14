@@ -14,15 +14,15 @@
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem">
 
   @foreach([
-    ['label'=>'Kabar Lentera', 'icon'=>'📰', 'data'=>$stats['kabar'],  'color'=>'#3b82f6', 'route'=>'admin.kabar.index'],
-    ['label'=>'Podcast',       'icon'=>'🎙', 'data'=>$stats['podcast'],'color'=>'#8b5cf6', 'route'=>'admin.podcast.index'],
-    ['label'=>'Komik',         'icon'=>'📖', 'data'=>$stats['komik'],  'color'=>'#10b981', 'route'=>'admin.komik.index'],
+    ['label'=>'Kabar Lentera', 'icon'=>'📰', 'data'=>$stats['kabar'],  'color'=>'#3b82f6', 'key'=>'KABAR'],
+    ['label'=>'Podcast',       'icon'=>'🎙', 'data'=>$stats['podcast'],'color'=>'#8b5cf6', 'key'=>'PODCAST'],
+    ['label'=>'Komik',         'icon'=>'📖', 'data'=>$stats['komik'],  'color'=>'#10b981', 'key'=>'KOMIK'],
   ] as $item)
   <div class="card" style="border-top:3px solid {{ $item['color'] }}">
     <div class="card-body" style="padding:1.2rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
         <span style="font-size:1.4rem">{{ $item['icon'] }}</span>
-        <a href="{{ route($item['route']) }}"
+        <a href="{{ route('admin.konten.index', $item['key']) }}"
           style="font-size:0.75rem;font-weight:600;color:{{ $item['color'] }};background:{{ $item['color'] }}18;padding:3px 10px;border-radius:20px;text-decoration:none">
           {{ $item['label'] }} →
         </a>
@@ -53,9 +53,9 @@
   <div class="card">
     <div class="card-header"><strong>⚡ Tambah Konten</strong></div>
     <div class="card-body" style="padding:1rem;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-      <a href="{{ route('admin.kabar.create') }}"  class="btn-primary"   style="text-align:center;font-size:0.78rem;width:auto">+ Artikel</a>
-      <a href="{{ route('admin.podcast.create') }}" class="btn-primary"  style="text-align:center;font-size:0.78rem;width:auto">+ Podcast</a>
-      <a href="{{ route('admin.komik.create') }}"   class="btn-primary"  style="text-align:center;font-size:0.78rem;width:auto">+ Komik</a>
+      <a href="{{ route('admin.konten.create', 'KABAR') }}"   class="btn-primary" style="text-align:center;font-size:0.78rem;width:auto">+ Artikel</a>
+      <a href="{{ route('admin.konten.create', 'PODCAST') }}" class="btn-primary" style="text-align:center;font-size:0.78rem;width:auto">+ Podcast</a>
+      <a href="{{ route('admin.konten.create', 'KOMIK') }}"   class="btn-primary" style="text-align:center;font-size:0.78rem;width:auto">+ Komik</a>
     </div>
   </div>
 
@@ -64,15 +64,15 @@
     <div class="card-body" style="padding:1rem">
       @php
         $myDrafts = collect([
-          ['label'=>'Kabar',   'count'=>$stats['kabar']['draft'],   'route'=>'admin.kabar.index'],
-          ['label'=>'Podcast', 'count'=>$stats['podcast']['draft'], 'route'=>'admin.podcast.index'],
-          ['label'=>'Komik',   'count'=>$stats['komik']['draft'],   'route'=>'admin.komik.index'],
+          ['label'=>'Kabar',   'count'=>$stats['kabar']['draft'],   'key'=>'KABAR'],
+          ['label'=>'Podcast', 'count'=>$stats['podcast']['draft'], 'key'=>'PODCAST'],
+          ['label'=>'Komik',   'count'=>$stats['komik']['draft'],   'key'=>'KOMIK'],
         ])->filter(fn($d) => $d['count'] > 0);
       @endphp
       @forelse($myDrafts as $d)
         <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
           <span style="font-size:0.85rem">{{ $d['label'] }}</span>
-          <a href="{{ route($d['route']) }}"
+          <a href="{{ route('admin.konten.index', $d['key']) }}"
             style="font-size:0.78rem;background:#fef3c720;color:#f59e0b;padding:2px 10px;border-radius:4px;border:1px solid #fbbf24;text-decoration:none">
             {{ $d['count'] }} draft →
           </a>

@@ -8,18 +8,18 @@
 
 <div class="nav-group-label">KONTEN</div>
 
-<a href="{{ route('admin.kabar.index') }}"
-  class="nav-item {{ str_starts_with($route, 'admin.kabar') ? 'active' : '' }}">
+<a href="{{ route('admin.konten.index', 'KABAR') }}"
+  class="nav-item {{ str_starts_with($route, 'admin.konten') ? 'active' : '' }}">
   <span>📰</span> Kabar Lentera
 </a>
 
-<a href="{{ route('admin.podcast.index') }}"
-  class="nav-item {{ str_starts_with($route, 'admin.podcast') ? 'active' : '' }}">
+<a href="{{ route('admin.konten.index', 'PODCAST') }}"
+  class="nav-item {{ str_starts_with($route, 'admin.konten') ? 'active' : '' }}">
   <span>🎙</span> Podcast
 </a>
 
-<a href="{{ route('admin.komik.index') }}"
-  class="nav-item {{ str_starts_with($route, 'admin.komik') ? 'active' : '' }}">
+<a href="{{ route('admin.konten.index', 'KOMIK') }}"
+  class="nav-item {{ str_starts_with($route, 'admin.konten') ? 'active' : '' }}">
   <span>📖</span> Komik
 </a>
 

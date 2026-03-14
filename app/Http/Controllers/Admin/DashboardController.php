@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdminUser;
-use App\Models\AuditLog;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -17,11 +16,9 @@ class DashboardController extends Controller
             return redirect()->route('auth.login');
         }
 
-        if ($user->isAdmin()) {
-            return $this->adminDashboard($user);
-        }
-
-        return $this->stafDashboard($user);
+        return $user->isAdmin()
+            ? $this->adminDashboard($user)
+            : $this->stafDashboard($user);
     }
 
     // ── Admin Dashboard ────────────────────────────────────
@@ -29,23 +26,22 @@ class DashboardController extends Controller
     {
         $stats = [
             'kabar' => [
-                'published' => DB::table('kabar')->whereNull('deleted_at')->where('status', 'published')->count(),
-                'draft'     => DB::table('kabar')->whereNull('deleted_at')->where('status', 'draft')->count(),
-                'total'     => DB::table('kabar')->whereNull('deleted_at')->count(),
-            ],
-            'podcast' => [
-                'published' => DB::table('podcast')->whereNull('deleted_at')->where('is_published', true)->count(),
-                'draft'     => DB::table('podcast')->whereNull('deleted_at')->where('is_published', false)->count(),
-                'total'     => DB::table('podcast')->whereNull('deleted_at')->count(),
+                'published' => DB::table('konten')->where('label', 'KABAR')->where('status', 'published')->count(),
+                'draft'     => DB::table('konten')->where('label', 'KABAR')->where('status', 'draft')->count(),
+                'total'     => DB::table('konten')->where('label', 'KABAR')->count(),
             ],
             'komik' => [
-                'published' => DB::table('komik')->whereNull('deleted_at')->where('is_published', true)->count(),
-                'draft'     => DB::table('komik')->whereNull('deleted_at')->where('is_published', false)->count(),
-                'total'     => DB::table('komik')->whereNull('deleted_at')->count(),
+                'published' => DB::table('konten')->where('label', 'KOMIK')->where('status', 'published')->count(),
+                'draft'     => DB::table('konten')->where('label', 'KOMIK')->where('status', 'draft')->count(),
+                'total'     => DB::table('konten')->where('label', 'KOMIK')->count(),
             ],
-            'layanan'  => DB::table('layanan')->count(),
+            'podcast' => [
+                'published' => DB::table('konten')->where('label', 'PODCAST')->where('status', 'published')->count(),
+                'draft'     => DB::table('konten')->where('label', 'PODCAST')->where('status', 'draft')->count(),
+                'total'     => DB::table('konten')->where('label', 'PODCAST')->count(),
+            ],
             'workshop' => DB::table('workshop')->whereNull('deleted_at')->count(),
-            'staf' => DB::table('admin_users')->where('role', 'staf')->count(),
+            'staf'     => DB::table('admin_users')->where('role', 'staf')->count(),
         ];
 
         $recentAudit = DB::table('audit_logs as a')
@@ -65,19 +61,19 @@ class DashboardController extends Controller
 
         $stats = [
             'kabar' => [
-                'published' => DB::table('kabar')->whereNull('deleted_at')->where('status', 'published')->where('created_by', $uid)->count(),
-                'draft'     => DB::table('kabar')->whereNull('deleted_at')->where('status', 'draft')->where('created_by', $uid)->count(),
-                'total'     => DB::table('kabar')->whereNull('deleted_at')->where('created_by', $uid)->count(),
-            ],
-            'podcast' => [
-                'published' => DB::table('podcast')->whereNull('deleted_at')->where('is_published', true)->where('created_by', $uid)->count(),
-                'draft'     => DB::table('podcast')->whereNull('deleted_at')->where('is_published', false)->where('created_by', $uid)->count(),
-                'total'     => DB::table('podcast')->whereNull('deleted_at')->where('created_by', $uid)->count(),
+                'published' => DB::table('konten')->where('label', 'KABAR')->where('status', 'published')->where('created_by', $uid)->count(),
+                'draft'     => DB::table('konten')->where('label', 'KABAR')->where('status', 'draft')->where('created_by', $uid)->count(),
+                'total'     => DB::table('konten')->where('label', 'KABAR')->where('created_by', $uid)->count(),
             ],
             'komik' => [
-                'published' => DB::table('komik')->whereNull('deleted_at')->where('is_published', true)->where('created_by', $uid)->count(),
-                'draft'     => DB::table('komik')->whereNull('deleted_at')->where('is_published', false)->where('created_by', $uid)->count(),
-                'total'     => DB::table('komik')->whereNull('deleted_at')->where('created_by', $uid)->count(),
+                'published' => DB::table('konten')->where('label', 'KOMIK')->where('status', 'published')->where('created_by', $uid)->count(),
+                'draft'     => DB::table('konten')->where('label', 'KOMIK')->where('status', 'draft')->where('created_by', $uid)->count(),
+                'total'     => DB::table('konten')->where('label', 'KOMIK')->where('created_by', $uid)->count(),
+            ],
+            'podcast' => [
+                'published' => DB::table('konten')->where('label', 'PODCAST')->where('status', 'published')->where('created_by', $uid)->count(),
+                'draft'     => DB::table('konten')->where('label', 'PODCAST')->where('status', 'draft')->where('created_by', $uid)->count(),
+                'total'     => DB::table('konten')->where('label', 'PODCAST')->where('created_by', $uid)->count(),
             ],
         ];
 

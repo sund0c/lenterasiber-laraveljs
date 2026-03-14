@@ -43,7 +43,7 @@ class PodcastController extends Controller
                 $q->where('title', 'like', "%{$search}%")
                     ->orWhere('episode_number', 'like', "%{$search}%")
                     ->orWhere('category', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+                    ->orWhere('excerpt', 'like', "%{$search}%");
             });
         }
 
@@ -143,7 +143,8 @@ class PodcastController extends Controller
         $data = $request->validate([
             'title'            => ['required', 'string', 'max:255'],
             'episode_number'   => ['required', 'string', 'max:20'],
-            'description'      => ['required', 'string', 'max:100'],
+            'excerpt'          => ['required', 'string', 'max:100'],
+            'content'          => ['nullable', 'string'],
             'audio_url'        => ['required', 'url', 'max:500'],
             'duration_minutes' => ['required', 'integer', 'min:1'],
             'published_date'   => ['required', 'date'],
@@ -152,7 +153,7 @@ class PodcastController extends Controller
 
         $data['is_published'] = $request->boolean('is_published');
 
-        foreach (['title', 'episode_number', 'description'] as $field) {
+        foreach (['title', 'episode_number', 'excerpt'] as $field) {
             $data[$field] = strip_tags($data[$field]);
         }
 

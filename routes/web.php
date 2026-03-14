@@ -3,11 +3,9 @@
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\TotpController;
 use App\Http\Controllers\Admin\DashboardController;
-use App\Http\Controllers\Admin\KabarController;
+use App\Http\Controllers\Admin\KontenController;
 use App\Http\Controllers\Admin\LayananController;
 use App\Http\Controllers\Admin\WorkshopController;
-use App\Http\Controllers\Admin\KomikController;
-use App\Http\Controllers\Admin\PodcastController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -54,13 +52,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth.full', 'auth.audit'])-
     Route::get('password/change',  [PasswordController::class, 'showChange'])->name('password.change');
     Route::post('password/change', [PasswordController::class, 'update'])->name('password.update');
 
-    // Kabar
-    Route::get('kabar/{id}/show', [KabarController::class, 'show'])->name('kabar.show');
-    Route::resource('kabar', KabarController::class)->except(['show']);
-
-    Route::middleware(\App\Http\Middleware\RoleMiddleware::class . ':admin')->group(function () {
-        Route::post('kabar/{id}/publish',   [KabarController::class, 'publish'])->name('kabar.publish');
-        Route::post('kabar/{id}/unpublish', [KabarController::class, 'unpublish'])->name('kabar.unpublish');
+    // ── Konten (Kabar / Komik / Podcast) ─────────────────────────────────
+    Route::prefix('konten/{label}')->name('konten.')->group(function () {
+        Route::get('/',              [KontenController::class, 'index'])->name('index');
+        Route::get('/create',        [KontenController::class, 'create'])->name('create');
+        Route::post('/',             [KontenController::class, 'store'])->name('store');
+        Route::get('/{id}',          [KontenController::class, 'show'])->name('show');
+        Route::get('/{id}/edit',     [KontenController::class, 'edit'])->name('edit');
+        Route::put('/{id}',          [KontenController::class, 'update'])->name('update');
+        Route::delete('/{id}',       [KontenController::class, 'destroy'])->name('destroy');
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/{id}/publish',   [KontenController::class, 'publish'])->name('publish');
+            Route::post('/{id}/unpublish', [KontenController::class, 'unpublish'])->name('unpublish');
+        });
     });
 
     // Layanan
@@ -69,13 +73,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth.full', 'auth.audit'])-
     // Workshop
     Route::resource('workshop', WorkshopController::class)->except(['show']);
 
-    // Komik
-    Route::get('komik/{id}/show', [KomikController::class, 'show'])->name('komik.show');
-    Route::resource('komik', KomikController::class)->except(['show']);
-
-    // Podcast
-    Route::get('podcast/{id}/show', [PodcastController::class, 'show'])->name('podcast.show');
-    Route::resource('podcast', PodcastController::class)->except(['show']);
 
     // Settings
     Route::get('settings',  [SettingsController::class, 'index'])->name('settings.index');
