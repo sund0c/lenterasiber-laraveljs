@@ -73,21 +73,23 @@ return new class extends Migration
             $table->index(['label', 'created_by']);
         });
 
-        // ── Workshop ──────────────────────────────────────────
-        Schema::create('workshop', function (Blueprint $table) {
+        // ── Page ──────────────────
+        Schema::create('staticpage', function (Blueprint $table) {
             $table->id();
+            $table->enum('label', ['JSC', 'WORKSHOP', 'GTL', 'ROADSHOW']);
             $table->string('title', 255);
-            $table->text('description')->nullable();
-            $table->date('event_date')->nullable();
-            $table->string('location', 255)->nullable();
-            $table->unsignedSmallInteger('capacity')->nullable();
-            $table->enum('status', ['upcoming', 'ongoing', 'completed', 'cancelled'])->default('upcoming');
-            $table->string('thumbnail', 255)->nullable();
+            $table->string('slug', 160)->nullable()->unique();
+            $table->string('excerpt', 400)->nullable();
+            $table->longText('content')->nullable();
+            $table->date('published_date')->nullable();
+            $table->enum('status', ['draft', 'published'])->default('draft');
+            $table->timestamp('published_at')->nullable();
+            $table->unsignedInteger('view_count')->default(0);
             $table->foreignId('created_by')->nullable()->constrained('admin_users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('admin_users')->nullOnDelete();
             $table->timestamps();
-            $table->softDeletes();
-
-            $table->index(['status', 'event_date']);
+            $table->index(['label', 'status', 'published_date']);
+            $table->index(['label', 'created_by']);
         });
 
         // ── Site Settings ─────────────────────────────────────

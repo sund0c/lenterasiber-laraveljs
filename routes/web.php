@@ -4,8 +4,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\TotpController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\KontenController;
-use App\Http\Controllers\Admin\LayananController;
-use App\Http\Controllers\Admin\WorkshopController;
+use App\Http\Controllers\Admin\PageController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -67,12 +66,20 @@ Route::prefix('admin')->name('admin.')->middleware(['auth.full', 'auth.audit'])-
         });
     });
 
-    // Layanan
-    Route::resource('layanan',  LayananController::class)->except(['show']);
-
-    // Workshop
-    Route::resource('workshop', WorkshopController::class)->except(['show']);
-
+    // ── Page ─────────────────────────────────
+    Route::prefix('page/{label}')->name('page.')->group(function () {
+        Route::get('/',              [PageController::class, 'index'])->name('index');
+        Route::get('/create',        [PageController::class, 'create'])->name('create');
+        Route::post('/',             [PageController::class, 'store'])->name('store');
+        Route::get('/{id}',          [PageController::class, 'show'])->name('show');
+        Route::get('/{id}/edit',     [PageController::class, 'edit'])->name('edit');
+        Route::put('/{id}',          [PageController::class, 'update'])->name('update');
+        Route::delete('/{id}',       [PageController::class, 'destroy'])->name('destroy');
+        Route::middleware('role:admin')->group(function () {
+            Route::post('/{id}/publish',   [PageController::class, 'publish'])->name('publish');
+            Route::post('/{id}/unpublish', [PageController::class, 'unpublish'])->name('unpublish');
+        });
+    });
 
     // Settings
     Route::get('settings',  [SettingsController::class, 'index'])->name('settings.index');

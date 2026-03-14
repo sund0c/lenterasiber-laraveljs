@@ -40,7 +40,6 @@ class DashboardController extends Controller
                 'draft'     => DB::table('konten')->where('label', 'PODCAST')->where('status', 'draft')->count(),
                 'total'     => DB::table('konten')->where('label', 'PODCAST')->count(),
             ],
-            'workshop' => DB::table('workshop')->whereNull('deleted_at')->count(),
             'staf'     => DB::table('admin_users')->where('role', 'staf')->count(),
         ];
 

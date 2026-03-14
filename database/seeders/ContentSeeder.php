@@ -76,7 +76,7 @@ class ContentSeeder extends Seeder
         foreach ($komikData as $i => [$title, $episode, $category]) {
             DB::table('konten')->insert([
                 'label'          => 'KOMIK',
-                'slug'           => 'komik-' . Str::slug($episode) . '-' . ($i + 1),
+                'slug'           => 'komik-' . Str::slug($title) . '-' . ($i + 1),
                 'title'          => $title,
                 'episode_number' => $episode,
                 'category'       => $category,
@@ -127,7 +127,7 @@ class ContentSeeder extends Seeder
         foreach ($podcastData as $i => [$title, $episode, $duration, $category]) {
             DB::table('konten')->insert([
                 'label'            => 'PODCAST',
-                'slug'             => 'podcast-' . Str::slug($episode) . '-' . ($i + 1),
+                'slug'             => 'podcast-' . Str::slug($title) . '-' . ($i + 1),
                 'title'            => $title,
                 'episode_number'   => $episode,
                 'category'         => $category,

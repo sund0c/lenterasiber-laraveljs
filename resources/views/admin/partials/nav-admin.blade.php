@@ -6,29 +6,63 @@
     <span>🏠</span> Dashboard
 </a>
 
-<div class="nav-group-label">KONTEN</div>
+<div class="nav-group-label">Konten Dinamis</div>
 
-<a href="{{ route('admin.konten.index', 'KABAR') }}" class="nav-item {{ str_starts_with($route, 'admin.konten') ? 'active' : '' }}">
+<a href="{{ route('admin.konten.index', 'KABAR') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.konten') && request()->route('label') === 'KABAR' ? 'active' : '' }}">
     <span>📰</span> Kabar Lentera
 </a>
 
 <a href="{{ route('admin.konten.index', 'PODCAST') }}"
-    class="nav-item {{ str_starts_with($route, 'admin.konten') ? 'active' : '' }}">
-    <span>🎙</span> Podcast
+    class="nav-item {{ str_starts_with($route, 'admin.konten') && request()->route('label') === 'PODCAST' ? 'active' : '' }}">
+    <span>🎧</span> Podcast
 </a>
 
-<a href="{{ route('admin.konten.index', 'KOMIK') }}" class="nav-item {{ str_starts_with($route, 'admin.konten') ? 'active' : '' }}">
-    <span>📖</span> Komik
+<a href="{{ route('admin.konten.index', 'KOMIK') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.konten') && request()->route('label') === 'KOMIK' ? 'active' : '' }}">
+    <span>💬</span> Komik
 </a>
 
-<a href="{{ route('admin.layanan.index') }}"
-    class="nav-item {{ str_starts_with($route, 'admin.layanan') ? 'active' : '' }}">
-    <span>🛠</span> Layanan
+<div class="nav-group-label">Halaman Statis</div>
+
+<a href="{{ route('admin.page.index', 'WORKSHOP') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.page') && request()->route('label') === 'WORKSHOP' ? 'active' : '' }}">
+    <span>🛠️</span> Workshop
 </a>
 
-<a href="{{ route('admin.workshop.index') }}"
-    class="nav-item {{ str_starts_with($route, 'admin.workshop') ? 'active' : '' }}">
-    <span>🎓</span> Workshop
+<a href="{{ route('admin.page.index', 'GTL') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.page') && request()->route('label') === 'GTL' ? 'active' : '' }}">
+    <span>🎓</span> Goes To Latsar
+</a>
+
+<a href="{{ route('admin.page.index', 'ROADSHOW') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.page') && request()->route('label') === 'ROADSHOW' ? 'active' : '' }}">
+    <span>🚐</span> Roadshow
+</a>
+
+<a href="{{ route('admin.page.index', 'JSC') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.page') && request()->route('label') === 'JSC' ? 'active' : '' }}">
+    <span>🏆</span> JSC
+</a>
+
+<a href="{{ route('admin.page.index', 'TENTANG') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.page') && request()->route('label') === 'TENTANG' ? 'active' : '' }}">
+    <span>ℹ️</span> Tentang
+</a>
+
+<a href="{{ route('admin.page.index', 'KOMIK') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.page') && request()->route('label') === 'KOMIK' ? 'active' : '' }}">
+    <span>📚</span> Komik
+</a>
+
+<a href="{{ route('admin.page.index', 'PODCAST') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.page') && request()->route('label') === 'PODCAST' ? 'active' : '' }}">
+    <span>🎙️</span> Podcast
+</a>
+
+<a href="{{ route('admin.page.index', 'KABAR') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.page') && request()->route('label') === 'KABAR' ? 'active' : '' }}">
+    <span>📋</span> Kabar
 </a>
 
 <div class="nav-group-label">SISTEM</div>
