@@ -196,28 +196,24 @@
                         @enderror
                     </div>
 
-                    {{-- External URL: KOMIK & PODCAST --}}
-                    @if (in_array($label, ['KOMIK', 'PODCAST']))
-                        <div class="form-group">
-                            <label>
-                                {{ $label === 'KOMIK' ? 'Link Instagram' : 'Link Audio (DENGARKAN)' }}
-                                <span style="color:var(--red)">*</span>
-                            </label>
-                            <input type="url" name="external_url"
-                                class="form-input @error('external_url') is-error @enderror"
-                                value="{{ old('external_url', $item->external_url ?? '') }}"
-                                placeholder="{{ $label === 'KOMIK' ? 'https://www.instagram.com/p/...' : 'https://open.spotify.com/episode/...' }}"
-                                maxlength="500" required>
-                            <p class="field-hint">
-                                {{ $label === 'KOMIK'
-                                    ? 'Klik kartu komik di frontend akan membuka link ini di tab baru.'
-                                    : 'Link Spotify, Anchor, YouTube, atau platform podcast lainnya.' }}
-                            </p>
-                            @error('external_url')
-                                <p class="field-error">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    @endif
+
+                    <div class="form-group">
+                        <label>
+                            {{ $label === 'KOMIK' ? 'Link Instagram' : ($label === 'PODCAST' ? 'Link Spotify' : 'Link Kabar Lentera') }}
+                            <span style="color:var(--red)">*</span>
+                        </label>
+                        <input type="url" name="external_url"
+                            class="form-input @error('external_url') is-error @enderror"
+                            value="{{ old('external_url', $item->external_url ?? '') }}"
+                            placeholder="{{ $label === 'KOMIK' ? 'https://www.instagram.com/p/CRpzeeVgnui/?igsh=...' : ($label === 'PODCAST' ? 'hhttps://open.spotify.com/episode/22P9..' : 'https://cdn.kanal.baliprov.go.id/sign_self_signature/DnTEn...') }}"
+                            maxlength="500" required>
+                        <p class="field-hint">
+                            url Instagram, Spotify, Kanvir
+                        </p>
+                        @error('external_url')
+                            <p class="field-error">{{ $message }}</p>
+                        @enderror
+                    </div>
 
                 </div>
             </div>
@@ -226,28 +222,42 @@
             <div class="card" style="margin-bottom:1rem">
                 <div class="card-header"><strong>Cover & Pengaturan</strong></div>
                 <div class="card-body">
+                    @if ($label !== 'KABAR')
+                        <div class="form-group">
+                            <label>Gambar/Cover/Thumbnail <span style="color:var(--red)">*</span></label>
+                            {{-- {{ $label !== 'PODCAST' ? '/ Thumbnail' : '' }} --}}
+                            @if (isset($item) && $item->cover_image)
+                                <div style="margin-bottom:8px">
+                                    <img src="{{ asset('storage/' . $item->cover_image) }}"
+                                        style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+                                    <p class="field-hint">Upload baru untuk mengganti.</p>
+                                </div>
+                            @endif
+                            <input type="file" name="cover_image"
+                                class="form-input @error('cover_image') is-error @enderror" accept="image/jpeg,image/png"
+                                {{-- {{ !isset($item) ? 'required' : '' }} --}}>
+                            <p class="field-hint">JPG, PNG. Maks 2MB.
+                                {{-- {{ $label === 'KABAR' ? 'Rasio 16:9 disarankan.' : 'Rasio 1:1 disarankan.' }} --}}
+                            </p>
+                            @error('cover_image')
+                                <p class="field-error">{{ $message }}</p>
+                            @enderror
+                        </div>
+                    @endif
 
+                    {{-- Status: KABAR & KOMIK (PODCAST sudah di atas) --}}
+
+                    {{-- Judul --}}
                     <div class="form-group">
-                        <label>Gambar Cover {{ $label !== 'PODCAST' ? '/ Thumbnail' : '' }} <span
-                                style="color:var(--red)">*</span></label>
-                        @if (isset($item) && $item->cover_image)
-                            <div style="margin-bottom:8px">
-                                <img src="{{ asset('storage/' . $item->cover_image) }}"
-                                    style="width:{{ $label === 'KABAR' ? '160px;height:100px' : '80px;height:80px' }};object-fit:cover;border-radius:8px;border:1px solid var(--border)">
-                                <p class="field-hint">Upload baru untuk mengganti.</p>
-                            </div>
-                        @endif
-                        <input type="file" name="cover_image"
-                            class="form-input @error('cover_image') is-error @enderror" accept="image/jpeg,image/png"
-                            {{ !isset($item) ? 'required' : '' }}>
-                        <p class="field-hint">JPG, PNG. Maks 2MB.
-                            {{ $label === 'KABAR' ? 'Rasio 16:9 disarankan.' : 'Rasio 1:1 disarankan.' }}</p>
-                        @error('cover_image')
+                        <label>Ai Tools <span style="color:var(--muted);font-weight:normal">(opsional)</span></label>
+                        <input type="text" name="ai" id="konten_ai"
+                            class="form-input @error('title') is-error @enderror"
+                            value="{{ old('title', $item->ai ?? '') }}" maxlength="255">
+                        @error('ai')
                             <p class="field-error">{{ $message }}</p>
                         @enderror
                     </div>
 
-                    {{-- Status: KABAR & KOMIK (PODCAST sudah di atas) --}}
 
                     <div class="form-group" style="display:flex;align-items:center;padding-top:0.4rem">
                         @if ($isAdmin)

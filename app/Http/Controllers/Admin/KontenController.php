@@ -70,6 +70,8 @@ class KontenController extends Controller
     // ── Store ─────────────────────────────────────────────
     public function store(Request $request, string $label)
     {
+
+
         $label = $this->resolveLabel($label);
         $data  = $this->validated($request, $label);
 
@@ -129,6 +131,9 @@ class KontenController extends Controller
     // ── Update ────────────────────────────────────────────
     public function update(Request $request, string $label, int $id)
     {
+
+
+
         $label = $this->resolveLabel($label);
         $item  = DB::table('konten')->where('label', $label)->where('id', $id)->first();
         abort_if(!$item, 404);
@@ -221,6 +226,7 @@ class KontenController extends Controller
 
         $rules = [
             'title'          => ['required', 'string', 'max:255'],
+            'ai'          => ['nullable', 'string', 'max:255'],
             'excerpt'        => ['required', 'string', 'max:100'],
             'content'        => ['nullable', 'string'],
             'published_date' => ['required', 'date'],
@@ -237,9 +243,9 @@ class KontenController extends Controller
             // tidak ada field tambahan wajib
         }
 
+        $rules['external_url']   = ['required', 'url', 'max:500'];
         if (in_array($label, ['KOMIK', 'PODCAST'])) {
             $rules['episode_number'] = ['required', 'string', 'max:20'];
-            $rules['external_url']   = ['required', 'url', 'max:500'];
         }
 
         if ($label === 'PODCAST') {
@@ -250,6 +256,7 @@ class KontenController extends Controller
 
         // Sanitize
         $data['title']   = strip_tags($data['title']);
+        $data['ai']   = strip_tags($data['ai']);
         $data['excerpt'] = strip_tags($data['excerpt']);
         if (!empty($data['episode_number'])) {
             $data['episode_number'] = strip_tags($data['episode_number']);
@@ -286,8 +293,8 @@ class KontenController extends Controller
         if (!array_key_exists($mime, $allowed)) {
             abort(422, 'Tipe file tidak valid. Hanya JPG dan PNG.');
         }
-        if ($file->getSize() > 2048 * 1024) {
-            abort(422, 'Ukuran file melebihi 2MB.');
+        if ($file->getSize() > 5120 * 1024) {
+            abort(422, 'Ukuran file melebihi 5MB.');
         }
 
         $folder = 'uploads/' . strtolower($label);

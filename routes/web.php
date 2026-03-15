@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\TotpController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\KontenController;
 use App\Http\Controllers\Admin\PageController;
+use App\Http\Controllers\Admin\MarqueeController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\AdminUserController;
@@ -81,6 +82,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth.full', 'auth.audit'])-
         });
     });
 
+    // ── Marquee ─────────────────────────────────
+    Route::middleware('role:admin')->group(function () {
+        Route::get('marquee',          [MarqueeController::class, 'index'])->name('marquee.index');
+        Route::get('marquee/create',   [MarqueeController::class, 'create'])->name('marquee.create');
+        Route::post('marquee',         [MarqueeController::class, 'store'])->name('marquee.store');
+        Route::get('marquee/{id}/edit', [MarqueeController::class, 'edit'])->name('marquee.edit');
+        Route::put('marquee/{id}',     [MarqueeController::class, 'update'])->name('marquee.update');
+        Route::delete('marquee/{id}',  [MarqueeController::class, 'destroy'])->name('marquee.destroy');
+    });
+
     // Settings
     Route::get('settings',  [SettingsController::class, 'index'])->name('settings.index');
     Route::post('settings', [SettingsController::class, 'update'])->name('settings.update');
@@ -104,8 +115,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth.full', 'auth.audit'])-
 |--------------------------------------------------------------------------
 */
 Route::prefix('api')->name('api.')->group(function () {
-    Route::get('content',   [App\Http\Controllers\Api\ContentController::class, 'index'])->name('content');
-    Route::post('contact',  [App\Http\Controllers\Api\ContactController::class, 'store'])->name('contact');
+    Route::get('content',              [App\Http\Controllers\Api\ContentController::class, 'index'])->name('content');
+    Route::get('content/{label}/{id}', [App\Http\Controllers\Api\ContentController::class, 'show'])->name('content.show');
+    Route::get('marquee',              [App\Http\Controllers\Api\MarqueeController::class, 'index'])->name('marquee');
+    Route::post('contact',             [App\Http\Controllers\Api\ContactController::class, 'store'])->name('contact');
 });
 
 /*

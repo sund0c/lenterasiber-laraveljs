@@ -43,7 +43,7 @@ class ContentSeeder extends Seeder
             'created_at'            => $now,
             'updated_at'            => $now,
         ]);
-
+        /*
         // ── KOMIK ─────────────────────────────────────────────
         $komikData = [
             ['Si Pancing — Kisah Phishing di Kotak Masuk',   'Episode 1',  'Keamanan Email'],
@@ -195,7 +195,7 @@ class ContentSeeder extends Seeder
                 'updated_at'     => $now,
             ]);
         }
-
+*/
         $this->command->info('');
         $this->command->info('✓ Seeder selesai: 2 user, 25 komik, 25 podcast, 25 kabar (tabel konten).');
         $this->command->info('');

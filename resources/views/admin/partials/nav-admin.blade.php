@@ -23,6 +23,33 @@
     <span>💬</span> Komik
 </a>
 
+<div class="nav-group-label">Landing Page</div>
+
+<a href="{{ route('admin.marquee.index') }}"
+    class="nav-item {{ str_starts_with($route, 'admin.marquee') ? 'active' : '' }}">
+    <span>❯</span> Marquee Info
+</a>
+<a href="{{ route('admin.konten.index', 'KABAR') }}"
+    class="nav-item {{ false ? 'active' : '' }}">
+    <span>❯</span> Hero
+</a>
+<a href="{{ route('admin.konten.index', 'KABAR') }}"
+    class="nav-item {{ false ? 'active' : '' }}">
+    <span>❯</span> Program
+</a>
+<a href="{{ route('admin.konten.index', 'KABAR') }}"
+    class="nav-item {{ false ? 'active' : '' }}">
+    <span>❯</span> Tentang
+</a>
+<a href="{{ route('admin.konten.index', 'KABAR') }}"
+    class="nav-item {{ false ? 'active' : '' }}">
+    <span>❯</span> Komik
+</a>
+<a href="{{ route('admin.konten.index', 'KABAR') }}"
+    class="nav-item {{ false ? 'active' : '' }}">
+    <span>❯</span> Kontak
+</a>
+
 <div class="nav-group-label">Halaman Statis</div>
 
 <a href="{{ route('admin.page.index', 'WORKSHOP') }}"
@@ -81,6 +108,7 @@
     class="nav-item {{ str_starts_with($route, 'admin.settings') ? 'active' : '' }}">
     <span>⚙️</span> Pengaturan
 </a>
+
 <a href="{{ route('admin.password.change') }}"
     class="nav-item {{ str_starts_with($route, 'admin.password') ? 'active' : '' }}">
     <span>🔑</span> Ganti Password

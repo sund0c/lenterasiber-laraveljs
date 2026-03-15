@@ -53,6 +53,7 @@ return new class extends Migration
             $table->id();
             $table->enum('label', ['KABAR', 'KOMIK', 'PODCAST']);
             $table->string('title', 255);
+            $table->string('ai', 255);
             $table->string('slug', 160)->nullable()->unique();       // KABAR only
             $table->string('episode_number', 20)->nullable();        // KOMIK & PODCAST
             $table->string('category', 100)->nullable();             // admin only
@@ -99,6 +100,19 @@ return new class extends Migration
             $table->string('type', 20)->default('string');
             $table->timestamps();
         });
+
+        // ── Marquee ─────────────────────────────────────
+        Schema::create('marquees', function (Blueprint $table) {
+            $table->id();
+            $table->string('title', 100);
+            $table->enum('status', ['draft', 'published'])->default('draft');
+            $table->timestamp('published_at')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('admin_users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('admin_users')->nullOnDelete();
+            $table->timestamps();
+            $table->index(['status']);
+            $table->index(['created_by']);
+        });
     }
 
     public function down(): void
@@ -106,6 +120,8 @@ return new class extends Migration
         Schema::dropIfExists('site_settings');
         Schema::dropIfExists('workshop');
         Schema::dropIfExists('konten');
+        Schema::dropIfExists('marquees');
+        Schema::dropIfExists('staticpage');
         Schema::dropIfExists('cache_locks');
         Schema::dropIfExists('cache');
         Schema::dropIfExists('sessions');
